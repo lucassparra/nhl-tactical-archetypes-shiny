@@ -1,0 +1,97 @@
+/* 1. Fondo General y Cuerpo */
+body {
+  font-family: 'Verdana', sans-serif;
+  color: #1A1A1A;
+  background-color: #FFFFFF !important;
+}
+
+#content {
+  background-color: #F0F4F7 !important;
+}
+
+/* 2. Barra Lateral (Sidebar) - Azul de los títulos */
+#sidebar {
+  background-color: #214467 !important; /* Azul Navy profundo */
+  border-right: 3px solid #F0F4F7 !important; /* Línea roja Firebrick de separación */
+}
+
+/* Título superior izquierda: Fondo Azul Navy con letras Rojas resaltadas */
+#sidebar h2 {
+  background-color: #B22222 !important; /* Mantiene el azul de la barra */
+  text-align: center;
+  padding: 25px 15px;
+  margin: 0;
+  border-bottom: 2px solid #F0F4F7; /* Opcional: una línea roja fina debajo del título */
+}
+
+/* El color rojo específico para el texto del título */
+#sidebar h2 a, 
+#sidebar h2 {
+  color: #F0F4F7 !important; /* Rojo Firebrick (el de tus subrayados) */
+  font-weight: 800 !important; /* Más negrita para resaltar */
+  font-size: 1.1em; /* Un poco más grande */
+  text-transform: uppercase;
+  letter-spacing: 1.5px; /* Estilo NHL profesional */
+  text-decoration: none !important;
+}
+
+/* 3. Índice en la barra lateral */
+#sidebar a {
+  color: #D5DCE4 !important; /* Gris claro para que sea legible sobre azul */
+  transition: all 0.3s ease; /* Transición suave */
+}
+
+/* Efecto al pasar la flecha (Hover) */
+#sidebar a:hover {
+  background-color: #F0F4F7 !important; /* Fondo Blanco Hielo */
+  color: #214467 !important; /* Texto vuelve al azul para contraste */
+}
+
+/* Sección activa actualmente */
+.list-group-item.active, 
+.list-group-item.active:focus, 
+.list-group-item.active:hover {
+  background-color: #B22222 !important; /* Rojo para marcar dónde estás */
+  border-color: #B22222 !important;
+  color: #FFFFFF !important;
+}
+
+/* 4. Títulos del documento */
+h1, h2, h3 {
+  color: #214467 !important;
+  border-bottom: 3px solid #B22222; 
+  padding-bottom: 8px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* 5. Bloques de código y tablas */
+pre, code {
+  background-color: #F8FAFB !important;
+  border-left: 5px solid #214467 !important;
+}
+
+th {
+  background-color: #214467 !important;
+  color: white !important;
+}
+
+/* 6. Esquina inferior de la barra lateral (Autor y Fecha) */
+#postamble {
+  background-color: #1A1A1A !important; /* Tu color negro actual */
+  border-top: 3px solid #F0F4F7 !important; /* Línea roja gruesa para separar del azul */
+  color: #F0F4F7 !important; /* Letras en Blanco Hielo */
+  padding: 15px 5px; /* Un poco de aire para que no esté pegado a la línea */
+}
+
+#postamble .author, 
+#postamble .date {
+  color: #F0F4F7 !important;
+  font-weight: bold;
+}
+
+/* Iconos o párrafos adicionales en la parte inferior */
+#postamble p {
+  color: #F0F4F7 !important;
+  margin-bottom: 5px;
+}

@@ -1,0 +1,11 @@
+# Archivos temporales y de sesión de R
+.RData
+.Rhistory
+.RDataTmp
+.Rproj.user/
+datos/
+
+# Archivos del sistema
+Thumbs.db
+desktop.ini
+.DS_Store

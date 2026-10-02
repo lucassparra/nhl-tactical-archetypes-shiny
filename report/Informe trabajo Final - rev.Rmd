@@ -1,0 +1,2692 @@
+---
+title: "INFORME ESTUDIO JUGADORES NHL"
+author: "Grupo 13"
+date: "Mayo 2026"
+output:
+  rmdformats::readthedown:
+    highlight: tango
+    code_folding: show
+    cache: FALSE
+    toc_depth: 2
+    css: estiloHockey.css
+editor_options: 
+  markdown: 
+    wrap: 72
+lang: es
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# INTRODUCCIÓN
+
+## CONTEXTUALIZACIÓN DEL PROBLEMA Y ORIGEN DE LOS DATOS
+
+El hockey sobre hielo, y en particular la National Hockey League (NHL),
+es uno de los deportes de equipo más rápidos, fluidos y complejos que
+existen. Tradicionalmente, la evaluación de los jugadores se ha basado
+en un sistema rígido de posiciones: Delanteros (Centros y Aleros)
+encargados de la ofensiva, y Defensas encargados de proteger la zona
+propia. Sin embargo, la reciente revolución analítica en el deporte y el
+aumento considerable de datos en relación a este, ha cuestionado esta
+simplificación.
+
+En la pista, el impacto de un jugador va mucho más allá de su posición
+en la alineación. Las estadísticas modernas demuestran que existen
+defensas con una producción ofensiva superior a la de muchos delanteros,
+así como atacantes cuyo principal valor reside en la fricción física, el
+bloqueo de tiros y la capacidad de provocar penalizaciones. Ante esta
+realidad, surge un problema analítico: las etiquetas tradicionales son
+insuficientes para describir el verdadero rol táctico de un jugador.
+
+Para abordar este problema, este trabajo inicialmente dispone de un
+conjunto de datos relacional masivo de la NHL obtenido de la plataforma
+Kaggle en el que se recogen datos desde la temporada 2000-01 hasta la
+2019-20. A través del análisis multivariante de métricas de rendimiento
+promedio por partido (goles, tiros, golpes, robos, tiempo en el hielo,
+etc.), se buscará trascender las posiciones oficiales para encontrar
+patrones ocultos en el estilo de juego de los jugadores.
+
+## INTRODUCCIÓN A LOS DATOS
+
+El dataset inicial presenta una estructura relacional compuesta por las
+siguientes tablas:
+
+**game_skater_stats** -\> Las estadísticas básicas de cada skater que
+participó en cada partido.
+
+**player_info** -\> Información estática sobre los jugadores
+
+**game_plays** -\> Recoge las jugadas individuales que componen un
+partido
+
+**game_plays_players** -\> Jugadores involucrados en las jugadas
+individuales y papel dentro de ellas
+
+**game_goalie_stats** -\> Estadísticas básicas de cada portero que tuvo
+tiempo de juego en cada partido
+
+**game_officials** -\> Registro del equipo arbitral de cada partido
+
+**game.csv** -\> Registro de cada partido
+
+**team_info** -\> Información estática de los equipos
+
+**game_teams_stats** -\> Estadísticas básicas de cada equipo por partido
+
+**game_goals** -\> Goles anotados
+
+**game_penalties** -\> Penalizaciones recibidas
+
+**game_shifts** -\> Detalles sobre qué jugadores estuvieron en la pista
+de hielo y en qué momentos de cada partido
+
+**game_scratches** -\> Registro de jugadores convocados pero que no
+jugaron
+
+A continuación se explica brevemente el significado de cada variable en
+las tablas seleccionadas para el objetivo de nuestro trabajo.
+
+## TABLAS SELECCIONADAS
+
+**GAME_SKATER_STATS**
+
+*game_id* -\> Identificador del partido
+
+*player_id* -\> Identificador del jugador
+
+*team_id* -\> Identificador del equipo
+
+*timeOnIce* -\> Tiempo total del jugador en la pista
+
+*assists* -\> Número de asistencias. En la NHL, una asistencia se otorga
+a los dos últimos jugadores del equipo que anota que tocaron el disco
+consecutivamente antes del goleador, siempre que no haya habido
+intercepción o posesión por parte del equipo contrario
+
+*goals* -\> Cantidad de goles marcados por el jugador en ese encuentro
+
+*shots* -\> Total de tiros a puerta realizados por el jugador
+
+*hits* -\> Número de impactos físicos o cargas legales que el jugador
+realizó a un rival.
+
+*powerPlayGoals* -\> Goles marcados por el jugador mientras su equipo
+jugaba con superioridad numérica
+
+*powerPlayAssists* -\> Asistencias repartidas por el jugador durante una
+superioridad numérica.
+
+*penaltyMinutes* -\> Minutos totales de castigo que el jugador tuvo que
+cumplir en la caja de penalizaciones por cometer infracciones
+
+*faceOffWins* -\> Cantidad de saques neutrales en los que el jugador
+ganó la posesión del disco
+
+*faceoffTaken* -\> Total de saques neutrales en los que el jugador
+participó
+
+*takeaways* -\> Número de veces que el jugador robó o recuperó
+activamente el disco de un rival
+
+*giveaways* -\> Número de veces que el jugador perdió la posesión del
+disco debido a un error no forzado
+
+*shortHandedGoals* -\> Goles marcados por el jugador mientras su equipo
+estaba en desventaja numérica
+
+*shortHandedAssists* -\> Asistencias dadas por el jugador estando su
+equipo en desventaja numérica
+
+*blocked* -\> Tiros del equipo contrario que el jugador interceptó o
+bloqueó
+
+*plusMinus* -\> Balance del rendimiento del equipo con el jugador en
+pista
+
+*evenTimeOnIce* -\> Tiempo que el jugador pasó en pista en situaciones
+igualdad numérica
+
+*shortHandedTimeOnIce* -\> Tiempo que el jugador pasó en pista en
+situaciones inferioridad numérica
+
+*powerPlayTimeOnIce* -\> Tiempo que el jugador pasó en pista en
+situaciones superioridad numérica
+
+**PLAYER_INFO**
+
+*player_id* -\> Identificador del jugador
+
+*firstName* -\> Nombre
+
+*lastName* -\> Apellido
+
+*nationality* -\> Nacionalidad
+
+*birthCity* -\> Ciudad de nacimiento
+
+*primaryPosition* -\> Posición principal
+
+*birthDate* -\> Fecha de nacimiento
+
+*birthStateProvince* -\> Estado o provincia de nacimiento
+
+*height* -\> Altura
+
+*height_cm* -\> Altura en centímetros
+
+*weight* -\> Peso
+
+*shootsCatches* -\> Lateralidad del jugador (Zurdo \| Diestro)
+
+**GAME**
+
+*game_id* -\> Identificador del partido
+
+*season* -\> Temporada
+
+*type* -\> Fase de la temporada a la que corresponde el partido
+
+*date_time_GMT* -\> Fecha y hora del inicio del partido
+
+*away_team_id* -\> Identificador del equipo visitante
+
+*home_team_id* -\> Identificador del equipo local
+
+*away_goals* -\> Goles anotados por el equipo visitante
+
+*home_goals* -\> Goles anotados por el equipo local
+
+*outcome* -\> Resultado final que describe al ganador y la forma en que
+se decidió el partido (Tiempo regular, prórroga o penaltis)\
+*home_rink_side_start* -\> Lado de la pista en el que comenzó jugando el
+equipo local en el primer periodo
+
+*venue* -\> Nombre del pabellón
+
+*venue_link* -\> Ruta o enlace a la API de la NHL que contiene los
+detalles específicos de ese pabellón
+
+*venue_time_zone_id* -\> Identificador geográfico estándar de la zona
+horaria donde se ubica el estadio
+
+*venue_time_zone_offset* -\> Diferencia en horas respecto al tiempo
+universal (UTC) aplicable a la ciudad del estadio
+
+*venue_time_zone_tz* -\> Abreviatura oficial de la zona horaria local en
+la que se jugó el partido
+
+**TEAM_INFO**
+
+*team_id* -\> Identificador del equipo
+
+*franchiseId* -\> Identificador histórico de la franquicia, el cual se
+mantiene intacto a lo largo del tiempo incluso si el equipo cambia de
+nombre o de ciudad
+
+*shortName* -\> Nombre corto
+
+*teamName* -\> Nombre geográfico de la ciudad, estado o provincia a la
+que representa la franquicia
+
+*abbreviation* -\> Abreviatura oficial de tres letras
+
+*link* -\> Ruta o enlace específico a la API de la NHL donde se
+encuentra almacenada la información adicional y extendida sobre el
+equipo
+
+**GAME_TEAMS_STATS**
+
+*game_id* -\> Identificador del partido
+
+*team_id* -\> Identificador del equipo
+
+*HoA* -\> Indica si el equipo jugó de local o visitante
+
+*won* -\> Indica si el equipo ganó el partido (Booleana)
+
+*settled_in* -\> Indica en qué momento o fase finalizó el partido
+
+*head_coach* -\> Nombre del entrenador principal que dirigió al equipo
+durante ese partido
+
+*goals* -\> Número total de goles anotados por el equipo
+
+*shots* -\> Total de tiros a puerta realizados por el equipo
+
+*hits* -\> Número total de impactos o cargas físicas aplicadas por los
+jugadores del equipo
+
+*pim* -\> Minutos totales de penalización acumulados
+
+*powerPlayOpportunities* -\> Número de veces que el equipo tuvo ventaja
+numérica
+
+*powerPlayGoals* -\> Número total de goles anotados por el equipo
+durante situaciones de ventaja numérica
+
+*faceOffWinPercentage* -\> Porcentaje global de saques neutrales ganados
+
+*giveaways* -\> Número total de pérdidas de disco por errores no
+forzados
+
+*takeaways* -\> Número total de recuperaciones o robos de disco
+
+*blocked* -\> Cantidad total de tiros rivales que fueron bloqueados o
+interceptados
+
+## TABLAS DESCARTADAS
+
+**GAME_GOALS**
+
+Se excluye por redundancia. La contabilización de los goles anotados ya
+está presente como una variable agregada tanto a nivel individual como a
+nivel colectivo en las tablas seleccionadas.
+
+**GAME_PENALTIES**
+
+Descartada igualmente por redundancia. Los minutos de expulsión de un
+jugador ya están cuantificados en la variable penaltyMinutes de la tabla
+de estadísticas de los jugadores.
+
+**GAME_GOALIE_STATS**
+
+La posición de portero tiene una naturaleza asimétrica respecto al resto
+de jugadores de campo y sus métricas recogidas son muy distintas. Este
+estudio se centra en la construcción de arquetipos para jugadores de
+campo (skaters).
+
+**GAME_OFFICIALS**
+
+Carece de total relevancia para el objetivo del estudio.
+
+**GAME_SCRATCHES**
+
+Al no registrar participación ni métricas de rendimiento deportivo,
+carecen de utilidad.
+
+**GAME_SHIFTS**
+
+Se rechaza porque la métrica que realmente nos interesa para evaluar el
+impacto a nivel de tiempo de juego de un jugador es el tiempo total
+acumulado. Esta variable (timeOnIce) ya viene representada en la tabla
+seleccionada.
+
+**GAME_PLAYS**
+
+Su extrema granularidad excede los objetivos iniciales de este trabajo y
+supone una carga computacional innecesaria. Para identificar arquetipos
+de jugadores mediante técnicas multivariantes,las métricas ya agregadas
+por partido son suficientemente robustas. Sin embargo, consideramos que
+recuperar esta tabla sería una excelente vía de continuación futura para
+realizar análisis más avanzados, como el estudio espacial del
+comportamiento o la evaluación técnica de las aptitudes de los jugadores
+sobre el hielo.
+
+**GAME_PLAYS_PLAYERS**
+
+Muy ligada a la anterior, se descarta pues no aporta ningún valor.
+
+## ACOTACIÓN TEMPORAL Y SELECCIÓN DE LA MUESTRA
+
+Para el estudio, hemos delimitado el análisis exclusivamente a la
+temporada regular 2018-2019. Esto lo hemos hecho en base a dos
+criterios. En primer lugar, asegura la independencia estadística de las
+observaciones, ya que, incluir múltiples temporadas generaría registros
+duplicados del mismo jugador en diferentes etapas de su carrera, lo cual
+sesgaría artificialmente la formación de clústeres al agrupar individuos
+consigo mismos en lugar de por estilos de juego. Además el rol de un
+jugador puede evolucionar a lo largo de su carrera y por consiguiente su
+arquetipo. Analizar una sola temporada es como sacar una fotografía fija
+del ecosistema de la liga, lo que hace que los arquetipos sean puros y
+no se mezclen con la evolución de los jugadores.
+
+En segundo lugar, hemos elegido la temporada 2018-2019 por ser la última
+temporada completa y regular (82 partidos por franquicia) previa a las
+interrupciones debidas a la pandemia del COVID-19, las cuales provocaron
+calendarios incompletos y divisiones aisladas en la temporada 2019-2020.
+De este modo, nos aseguramos un entorno competitivo homogéneo,
+representativo del hockey moderno y con un volumen de partidos idéntico
+para todos los equipos.
+
+## OBJETIVOS
+
+El propósito general de este proyecto es descubrir y clasificar los
+perfiles de juego reales dentro de la liga, para posteriormente analizar
+cómo las franquicias construyen sus plantillas basándose en estos
+perfiles. Este propósito se desglosa en los siguientes objetivos
+específicos:
+
+#### Objetivo 1: Lectura, preparación y exploración visual de los datos
+
+Ejecutar la integración de las distintas tablas de estadísticas, seguida
+de una limpieza profunda para filtrar jugadores con baja participación y
+normalizar las métricas. Este proceso se completa con una exploración
+visual que permite identificar sesgos posicionales y preparar una base
+de datos sólida y libre de sesgos para el modelado avanzado.
+
+#### Objetivo 2: Reducción de dimensionalidad
+
+Aplicar el Análisis de Componentes Principales (PCA) para simplificar
+las múltiples variables del juego en unos pocos ejes clave que expliquen
+la mayor parte del rendimiento. Este paso permite eliminar información
+redundante y traducir estadísticas complejas en dimensiones tácticas
+claras y manejables para el clustering.
+
+#### Objetivo 3: Identificación de arqutipos
+
+Implementar técnicas de Clustering sobre las componentes principales
+para agrupar a los jugadores en "Arquetipos" puramente empíricos (ej.
+Artilleros, Defensas de Choque, Creadores de Juego), evaluando si estos
+coinciden o divergen de sus posiciones nominales.
+
+#### Objetivo 4: Análisis estructural de los equipos
+
+Extrapolar los arquetipos individuales a un nivel colectivo, agrupando
+los datos por equipos para analizar la composición de las plantillas. Se
+buscará visualizar qué proporción de cada arquetipo compone a los
+distintos equipos de la liga.
+
+#### Objetivo 5: Desarrollo de una aplicación interactiva
+
+Implementar una herramienta interactiva mediante R Shiny que permita
+visualizar y comparar los perfiles de los jugadores en tiempo real,
+facilitando la toma de decisiones en direcciones deportivas mediante la
+exploración dinámica de los arquetipos generados.
+
+# 1. LECTURA, VISUALIZACION Y PREPARACIÓN DE DATOS
+
+## CARGA E INTEGRACIÓN DE LIBRERÍAS Y TABLAS
+
+```{r}
+#Librerias
+suppressMessages(suppressWarnings({
+library(dplyr)
+library(knitr)
+library(ggplot2)
+library(ggbiplot)
+library(reshape2)
+library(tidyr)
+library(patchwork)
+library(factoextra)
+library(FactoMineR)
+library(cluster)
+library(hopkins)
+library(forcats)
+library(scales)
+library(jpeg) 
+library(png)
+library(grid)
+library(readr)
+}))
+```
+
+```{r}
+suppressMessages({
+games <- read_csv("datos/game.csv")
+skater_stats <- read_csv("datos/game_skater_stats.csv")
+player_info <- read_csv("datos/player_info.csv")
+team_info <- read_csv("datos/team_info.csv")
+game_goals <- read_csv("datos/game_goals.csv")
+game_penalties <- read_csv("datos/game_penalties.csv")
+game_plays <- read_csv("datos/game_plays.csv")
+game_plays_players <- read_csv("datos/game_plays_players.csv")
+game_scratches <- read_csv("datos/game_scratches.csv")
+game_shifts <- read_csv("datos/game_shifts.csv")
+game_skater_stats <- read_csv("datos/game_skater_stats.csv")
+game_teams_stats <- read_csv("datos/game_teams_stats.csv")
+skaters <- game_skater_stats
+players <- player_info
+teams <- team_info
+})
+```
+
+Como se ha mencionado en la introducción, sólo consideramos únicamente
+los partidos de la temporada 2018-2019
+
+```{r}
+games_2019 <- games %>% filter(season == 20182019)
+```
+
+Dado que los datos están distribuidos en varias tablas, es necesario
+unirlas para construir un único conjunto de datos a nivel de jugador por
+partido.
+
+```{r}
+suppressWarnings({
+  data <- skaters %>%
+    inner_join(games_2019, by = "game_id") %>%
+    inner_join(players, by = "player_id") %>%
+    distinct(game_id, player_id, .keep_all = TRUE)
+  
+  data %>% head() %>% kable()
+})
+```
+
+## **LIMPIEZA DE DATOS**
+
+Antes de proceder al análisis descriptivo y multivariante, es necesario
+realizar una fase de limpieza de los datos con el objetivo de garantizar
+la calidad y fiabilidad de los resultados obtenidos.
+
+Para empezar dicha fase, estudiamos la existencia de valores nulos en
+cada una de las variables.
+
+```{r}
+# Porcentaje de NAs por variable
+na_porcentaje <- colMeans(is.na(data)) * 100 
+
+# Convertir el vector a dataframe
+na_df <- data.frame(
+  Variable = names(na_porcentaje),
+  Porcentaje_nulos = as.numeric(na_porcentaje)) %>%
+  arrange(desc(Porcentaje_nulos))
+na_df %>%  kable()
+```
+
+```{r}
+na_df_filtrado <- na_df %>% filter(Porcentaje_nulos > 0)
+
+ggplot(na_df_filtrado, aes(x = reorder(Variable, -Porcentaje_nulos), y = Porcentaje_nulos)) +
+  geom_bar(stat = "identity", fill = "steelblue", color = "black") +
+  geom_text(aes(label = Porcentaje_nulos), vjust = -0.5, size = 3) + 
+  coord_cartesian(ylim = c(0, 33)) +
+  labs(title = "Porcentaje de valores faltantes por variable",
+       x = "Variable",
+       y = "Porcentaje de NAs") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) 
+
+```
+
+Tras el análisis de los valores faltantes en el dataset, se observa que
+únicamente tres variables presentan nulos: *birthStateProvince,
+home_rink_side_start* y *nationality*. Todas las demás variables no
+contienen datos perdidos y, por tanto, no requieren tratamiento
+adicional.
+
+Para estas tres variables con valores ausentes, será necesario un
+estudio más detallado para decidir la estrategia de limpieza o
+imputación más adecuada, considerando la proporción de nulos y la
+relevancia de cada variable para los análisis posteriores.
+
+-   birthStateProvince --\> Muy alta. No aporta directamente al PCA ni
+    al clustering. Lo mejor sería eliminarla. Si más adelante se
+    considera necesario usarla en análisis descriptivo, se deja como
+    categoría "Desconocido", pero para métricas de rendimiento no aporta
+    nada.
+
+-   home_rink_side_start --\> Bajo porcentaje. Se podría imputar con la
+    moda ("Left" o "Right") o eliminar las filas, porque solo afecta a
+    unos pocos registros.
+
+-   nationality --\> Practicamente nada. Se puede imputar con la moda de
+    la nacionalidad (probablemente "CAN" o "USA").
+
+El objetivo principal es buscar arquetipos sobre los jugadores. Tras la
+agregación de las tablas y el filtrado de los nulos que pueden causar
+problemas, se obtiene una tabla que contiene datos de cada jugador en
+cada partido. Sin embargo, para que los arquetipos obtenidos sean
+estables se debe tener como filas los datos medios de cada jugador. De
+lo contrario, un mismo jugador con rendimientos muy distintos en
+partidos diferentes trastocaría el análisis.
+
+Además, dado que el análisis posterior se centra en la identificación de
+patrones de rendimiento y estilo de juego mediante técnicas
+multivariantes, resulta necesario realizar una selección previa de
+variables. Para abordar simultáneamente la presencia de valores nulos y
+la relevancia analítica de las variables, se opta por eliminar
+birthStateProvince, home_rink_side_start y nationality, ya que ninguna
+de ellas aporta información significativa para la construcción de
+arquetipos de juego en la NHL.
+
+Una vez descartadas estas tres variables, el siguiente paso consiste en
+identificar aquellas que, pese a no presentar valores nulos, resultan
+irrelevantes para describir el estilo de juego de los jugadores y, por
+tanto, no deben ser incluidas en el PCA. Aunque esta técnica permite
+reducir la dimensionalidad del conjunto de datos, su eficacia depende en
+gran medida de la calidad de las variables de entrada. En este sentido,
+la inclusión de variables no relevantes introduciría ruido en las
+componentes principales, dificultando la interpretación de los
+resultados y afectando negativamente al análisis.
+
+-   [Variables identificadoras *(game_id, player_id,
+    team_id)*:]{.underline} Su única función es distinguir observaciones
+    y no aportan información relevante desde el punto de vista
+    estadístico.
+
+-   [Variables de carácter contextual asociadas al partido
+    *(*]{.underline}*season, type, date_time_GMT, away_team_id,
+    home_team_id, away_goals, home_goals, outcome, venue, venue_link,
+    venue_time_zone_id, venue_time_zone_offset, venue_time_zone_tz)*:
+    Escriben el entorno del encuentro y no el rendimiento individual del
+    jugador.
+
+-   [Variables de carácter biográfico o descriptivo del
+    jugador]{.underline} *(firstName, lastName, nationality, birthCity,
+    birthDate, height, height_cm, weight, shootsCatches)*: Aportan
+    información general, no reflejan directamente el estilo de juego
+    sobre el hielo.
+
+-   [Variables altamente específicas o dependientes de situaciones
+    concretas de juego]{.underline} (powerPlayGoals, powerPlayAssists,
+    shortHandedGoals, shortHandedAssists, powerPlayTimeOnIce,
+    shortHandedTimeOnIce, evenTimeOnIce) Al ser situaciones específicas,
+    su inclusión podría introducir sesgos asociados al rol particular
+    del jugador dentro del equipo.
+
+    ```{r}
+    data_jugadores <- data %>%
+      group_by(player_id, firstName, lastName, nationality, primaryPosition, birthStateProvince) %>%
+      summarise(
+        goals = mean(goals, na.rm = TRUE),
+        assists = mean(assists, na.rm = TRUE),
+        shots = mean(shots, na.rm = TRUE),
+        hits = mean(hits, na.rm = TRUE),
+        blocked = mean(blocked, na.rm = TRUE),
+        takeaways = mean(takeaways, na.rm = TRUE),
+        giveaways = mean(giveaways, na.rm = TRUE),
+        penaltyMinutes = mean(penaltyMinutes, na.rm = TRUE),
+        timeOnIce = mean(timeOnIce, na.rm = TRUE),
+        plusMinus = mean(plusMinus, na.rm = TRUE),
+        
+        faceOffWins_total = sum(faceOffWins, na.rm = TRUE),
+        faceoffTaken_total = sum(faceoffTaken, na.rm = TRUE),
+        
+        partidos_jugados = n(),
+        .groups = 'drop') %>% 
+      filter(partidos_jugados >= 10) %>%
+      arrange(player_id)
+
+    data_jugadores %>% head(10) %>% kable()
+
+    ```
+
+```{r}
+data_jugadores_pca <- data_jugadores %>% select(goals, assists, shots, hits, blocked, takeaways,giveaways, penaltyMinutes, timeOnIce, plusMinus)
+```
+
+Las variables faceOffWins y faceoffTaken no son especialmente
+informativas por separado, ya que reflejan volumen de participación. Sin
+embargo, su ratio proporciona una medida de eficacia en los saques de
+centro, siendo útil para identificar jugadores especializados en esta
+faceta.
+
+```{r}
+data_jugadores <- data_jugadores %>% mutate(faceOffRatio = ifelse(faceoffTaken_total == 0, 0, faceOffWins_total / faceoffTaken_total))
+```
+
+Al existir jugadores que no participan en saques de centro (faceoffTaken
+= 0), el cálculo del ratio produce una indeterminación (división por
+cero). Para evitar este problema, se asigna el valor 0 al ratio en estos
+casos. Esta decisión implica que un valor 0 puede corresponder tanto a
+jugadores que no participan como a jugadores con un rendimiento muy
+bajo. Por ello, se incluye la variable faceoffTaken, para poder
+distinguir entre ambos casos.
+
+```{r}
+data_jugadores_pca <- data_jugadores %>% select(goals, assists, shots, hits, blocked, takeaways, giveaways, penaltyMinutes, timeOnIce, plusMinus, faceOffRatio, faceoffTaken_total)
+```
+
+## EXPLORACIÓN VISUAL DE LOS DATOS
+
+En este apartado vamos a realizar una exploración visual de los perfiles
+de los jugadores. Tras haber agrupado los datos para obtener una única
+observación por patinador basada en sus promedios por partido, estas
+visualizaciones nos permiten validar la estructura de nuestra
+información, y también nos sirven para ayudarnos a ver la problemática
+central de nuestro estudio: la insuficiencia de las etiquetas de
+posiciones oficiales para capturar la verdadera naturaleza táctica de
+los jugadores en la NHL.
+
+Vemos la distribución real de las estadísticas en un partido de la NHL:
+
+```{r}
+#Visualizamos únicamente las estadísticas que vamos a utilizar para el PCA
+data_long <- data_jugadores %>% 
+  select(goals, assists, shots, hits, blocked, takeaways,giveaways, penaltyMinutes, timeOnIce, plusMinus) %>% 
+  pivot_longer(cols = everything(), names_to = "Variable", values_to = "Valor")
+
+ggplot(data_long, aes(x = Valor)) +
+  geom_histogram(bins = 15, fill = "#214467", color = "white") +
+  facet_wrap(~ Variable, scales = "free") +
+  theme_minimal() +
+  labs(title = "Distribución de métricas por partido",
+       x = "Valor por partido",
+       y = "Frecuencia")
+```
+
+Estas gráficas confirman que, al promediar las estadísticas por jugador,
+las distribuciones mantienen una marcada asimetría a la derecha en
+métricas clave como goles, asistencias y bloqueos. Este patrón refleja
+la especialización de la liga, donde una élite reducida concentra la
+mayor producción ofensiva y física. Por el contrario, variables como el
+balance plusMinus o el tiempo en hielo muestran una tendencia
+centralizada, facilitando la identificación de perfiles mediante el
+análisis multivariante.
+
+Relación entre minutos jugados y tiros a puerta:
+
+```{r}
+suppressWarnings({
+ggplot(data_jugadores, aes(x = timeOnIce / 60, y = shots)) +
+  geom_point(alpha = 0.1, color = "steelblue") +
+  geom_smooth(method = "gam", formula = y ~ s(x, bs = "cs"), color = "red", se = FALSE) + 
+  theme_minimal() +
+  labs(title = "Relación entre Minutos Jugados y Tiros a Puerta",
+       x = "Tiempo en Hielo (Minutos)",
+       y = "Tiros a Puerta")
+})
+```
+
+Este gráfico de dispersión nos muestra una correlación positiva clara
+entre el tiempo en pista y la ejecución de tiros a puerta. Sin embargo,
+observamos una gran dispersión a partir de los 15 minutos de juego que
+revela perfiles muy diferenciados. Existen jugadores con alta carga de
+minutos pero enfoque estrictamente defensivo frente a otros que disparan
+con alta frecuencia en menor tiempo. Esta heterogeneidad justifica el
+uso de técnicas multivariantes para clasificar a los jugadores según su
+eficiencia y rol real, más allá de su simple presencia en el hielo.
+
+```{r}
+#Creamos una variable de "Éxito" (Puntos totales por partido)
+data_jugadores_graf <- data_jugadores %>%
+  mutate(
+    puntos_totales = goals + assists,
+    nombre_completo = paste(firstName, lastName)
+  )
+
+ggplot(data_jugadores_graf, aes(x = giveaways, y = takeaways)) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "gray50") +
+  #COLOREAMOS POR PUNTOS TOTALES (Éxito) y el tamaño por el Tiempo Jugado
+  geom_point(aes(color = puntos_totales, size = timeOnIce), alpha = 0.7) +
+  scale_color_viridis_c(option = "plasma", name = "Puntos/Partido") +
+  theme_minimal() +
+  labs(title = "Robos vs Pérdidas de Disco",
+       subtitle = "Los puntos más brillantes son los jugadores con más goles y asistencias",
+       x = "Pérdidas de disco por partido (Giveaways)",
+       y = "Robos de disco por partido (Takeaways)",
+       size = "Minutos/Partido")
+```
+
+Esta visualización muestra una paradoja con respecto al riesgo en la
+NHL, que aparece en la mayoría de deportes de equipo. Los jugadores con
+mayor producción ofensiva tienden a acumular más pérdidas de disco,
+reflejando su mayor responsabilidad creativa y tiempo de posesión. La
+mayoría de estos perfiles de élite se sitúan cerca o por encima de la
+diagonal, compensando el riesgo con un alto volumen de robos. Este
+fenómeno demuestra que las estadísticas negativas no pueden
+interpretarse de forma aislada, validando la necesidad de un análisis
+multivariante para capturar el valor real de cada jugador.
+
+Como se puede apreciar, los jugadores con mas puntos tienden a situarse
+en el cuadrante superior derecho. Este patrón confirma que las estrellas
+de la liga asumen el riesgo de perder el disco debido a su alta
+participación en el juego, pero lo compensan con una gran capacidad para
+recuperarlo. Esta distribución visual permite distinguir a los
+generadores de juego que tienen gran impacto, quienes, a pesar de sus
+estadísticas de pérdidas, son de los jugadores más importantes de su
+equipo.
+
+```{r}
+
+# Asignamos cada gráfico a un objeto
+p1 <- ggplot(data_jugadores %>% filter(primaryPosition %in% c("C", "LW", "RW", "D")), 
+             aes(x = primaryPosition, y = goals, fill = primaryPosition)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set2") +
+  labs(title = "Goles", x = "Posición", y = "Media por partido") +
+  theme(legend.position = "none")
+
+p2 <- ggplot(data_jugadores %>% filter(primaryPosition %in% c("C", "LW", "RW", "D")), 
+             aes(x = primaryPosition, y = blocked, fill = primaryPosition)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set2") +
+  labs(title = "Tiros bloqueados", x = "Posición", y = "Media por partido") +
+  theme(legend.position = "none")
+
+p3 <- ggplot(data_jugadores %>% filter(primaryPosition %in% c("C", "LW", "RW", "D")), 
+             aes(x = primaryPosition, y = assists, fill = primaryPosition)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set2") +
+  labs(title = "Asistencias", x = "Posición", y = "Media por partido") +
+  theme(legend.position = "none")
+
+p4 <- ggplot(data_jugadores %>% filter(primaryPosition %in% c("C", "LW", "RW", "D")), 
+             aes(x = primaryPosition, y = hits, fill = primaryPosition)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set2") +
+  labs(title = "Cargas legales", x = "Posición", y = "Media por partido") +
+  theme(legend.position = "none")
+
+# Creamos la matriz 2x2
+(p1 | p2) / (p3 | p4)
+```
+
+Al contrastar las estadísticas de rendimiento con las posiciones
+oficiales, observamos resultados que refuerzan la necesidad de un
+análisis multivariante. En las métricas de goles y tiros bloqueados, las
+etiquetas tradicionales mantienen cierta coherencia lógica ya que los
+defensas presentan una producción goleadora inferior y un volumen de
+bloqueos significativamente mayor que los atacantes. Sin embargo,
+incluso en estos casos, la distinción desaparece al comparar a los
+delanteros entre sí (C, LW, RW), quienes muestran distribuciones casi
+idénticas independientemente de su posición concreta.
+
+La ambigüedad es aún mayor en variables como las asistencias y las
+cargas legales. En estos casos, no existe una diferenciación clara ni
+siquiera entre defensas y atacantes. El solapamiento de los diagramas de
+caja es casi total. Estos confirman que, aunque la posición del jugador
+puede predecir comportamientos defensivos extremos, resulta insuficiente
+para capturar la complejidad de los roles híbridos y las especialidades
+técnicas de los jugadores modernos.
+
+# 2. REDUCCIÓN DE DIMENSINALIDAD -Análisis PCA-
+
+Tras la fase de limpieza, disponemos de un dataset con múltiples
+métricas que presentan una alta correlación entre sí. Es precisamente
+ahí donde reside la complejidad de los datos de la NHL que disponemos.
+Un jugador con muchos goles tiende a tener un alto volumen de disparos y
+tiempo en hielo. El uso directo de estas variables en un algoritmo de
+*clustering* podría dar unos arquetipos distorsionados. El Análisis de
+Componentes Principales (PCA) nos permite desglosar este ruido,
+transformando un conjunto de métricas redundantes en variables
+sintéticas (componentes) que capturan la verdadera esencia y el rol
+táctico de cada patinador.
+
+```{r}
+pca <- prcomp(data_jugadores_pca, center = TRUE, scale. = TRUE)
+kable(as.data.frame(round(summary(pca)$importance, 4)))
+```
+
+```{r}
+loadings <- pca$rotation
+loadings_melt <- melt(loadings)
+
+ggplot(loadings_melt, aes(x = Var2, y = Var1, fill = value)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "#0077B6", high = "#B22222", mid = "white",
+                       midpoint = 0) +
+  geom_text(aes(label = round(value, 2)), size = 3) +
+  theme_minimal() +
+  labs(title = "Heatmap de loadings del PCA",
+       x = "Componentes principales",
+       y = "Variables")
+```
+
+El primer diagnóstico del PCA reveló que las variables faceOffRatio y
+faceoffTaken_total dominaban ciertas componentes. Dado que en el hockey
+profesional solo los especialistas (principalmente centros) participan
+en esta faceta, mantener estas métricas obligaría al modelo a agrupar a
+los jugadores por su posición nominal. Al eliminarlas, 'forzamos' al
+algoritmo a centrarse en el estilo de juego dinámico (físico, creación,
+defensa) que es aplicable a todos los patinadores, independientemente de
+su demarcación oficial.
+
+```{r}
+data_jugadores_pca2 <- data_jugadores_pca %>% select(-faceOffRatio, -faceoffTaken_total)
+
+pca2 <- prcomp(data_jugadores_pca2, center = TRUE, scale. = TRUE)
+kable(as.data.frame(summary(pca2)$importance))
+```
+
+```{r}
+loadings <- pca2$rotation
+loadings_melt <- melt(loadings)
+
+ggplot(loadings_melt, aes(x = Var2, y = Var1, fill = value)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "#0077B6", high = "#B22222", mid = "white",
+                       midpoint = 0) +
+  geom_text(aes(label = round(value, 2)), size = 3) +
+  theme_minimal() +
+  labs(title = "Heatmap de loadings del PCA",
+       x = "Componentes principales",
+       y = "Variables")
+```
+
+Ahora sí, las componentes resultantes dejan de ser simples números y
+pasan a representar conceptos tácticos del hockey:
+
+-   PC1: El Perfil de Estrella o Volumen (39.03%)
+-   PC2: El Especialista Defensivo (19.68%)
+-   PC3: La Agresividad Disciplinaria (13.16%)
+-   PC4: El Factor Eficacia (9.55%)
+-   PC5: El Físico Limpio (5.21%)
+-   PC6: El Especialista en Recuperación (4.64%)
+
+La primera componente (PC1), que explica el 39.03% de la varianza total,
+actúa como un indicador de Volumen y Jerarquía. En esta dimensión,
+variables como las asistencias (0.45), los disparos (0.43) y el tiempo
+en el hielo (0.40) presentan cargas positivas elevadas. Esto significa
+que la PC1 define el estatus del jugador: hacia la derecha del eje
+encontraremos a las "estrellas" con alta participación y peligro
+constante, mientras que hacia la izquierda se sitúan los jugadores de
+rotación con un impacto estadístico más discreto.
+
+Por su parte, la segunda componente (PC2), con un 19.68% de varianza, se
+consolida como el eje de Especialización Táctica. Esta dimensión
+polariza el juego entre el ataque y el sacrificio defensivo; un valor
+marcadamente negativo en esta componente está impulsado por la capacidad
+de bloqueo de disparos (-0.61) y la intensidad en los impactos o hits
+(-0.36), identificando perfiles de "muro defensivo". En contraposición,
+los valores positivos se asocian a jugadores con mayor enfoque en la
+anotación de goles (0.33) que no priorizan las tareas de sacrificio en
+zona propia.
+
+La tercera componente (PC3) captura la Agresividad y Disciplina del
+atleta (13.16%). Aquí, el peso recae en los minutos de penalización
+(-0.65) y los hits (-0.57). Es la dimensión de la "fuerza bruta": cuanto
+más negativo sea el valor de un jugador en este eje, mayor es su
+tendencia a imponerse mediante el contacto físico y a visitar la caja de
+castigo.
+
+Paralelamente, la cuarta componente (PC4) representa el Factor Eficacia
+(9.55%), dominada casi exclusivamente por el plusMinus (-0.95). Esta
+métrica funciona como un termómetro del éxito colectivo, separando a los
+jugadores que logran resultados positivos en el marcador durante sus
+turnos de aquellos que suelen estar presentes cuando el equipo encaja
+goles.
+
+Finalmente, las componentes de menor varianza aportan matices de gran
+valor para el scouting especializado. La quinta componente (PC5)
+describe el Físico Limpio (5.21%), una dimensión que separa a los
+jugadores que emplean su físico de forma legal (altos hits, 0.62) de
+aquellos cuyas acciones suelen derivar en sanciones (penalizaciones
+negativas, -0.59). Por último, la sexta componente (PC6) se define como
+el Eje de Recuperación (4.64%), centrada específicamente en la lectura
+de juego y el robo de discos o takeaways (-0.79), permitiendo
+identificar a aquellos especialistas con capacidad para interceptar la
+posesión rival y dar inicio a transiciones ofensivas.
+
+```{r}
+# Calculamos la varianza explicada por cada componente
+suppressWarnings({
+ve <- pca2$sdev^2
+porcentaje_ve <- ve / sum(ve)
+
+datos_codo <- data.frame(
+  PC = 1:10,
+  Varianza = porcentaje_ve)
+
+ggplot(datos_codo, aes(PC, Varianza)) +
+  geom_line(size = 1, color = "#0077B6") + 
+  geom_point(size = 3, color = "#0077B6") +
+  scale_x_continuous(breaks = 1:10) +      
+  labs(title = "Método del Codo", 
+       x = "Componente Principal", 
+       y = "Varianza Explicada") + 
+  theme_minimal() +
+  coord_fixed(ratio = 10)
+})
+```
+
+Tras analizar la importancia de las componentes, se seleccionaron 4
+componentes principales. Esta decisión se apoya en el Método del Codo,
+que muestra una inflexión en la cuarta componente, y permite alcanzar
+una Varianza Acumulada del 81.42%. Aunque el criterio de Kaiser sugiere
+3 componentes, la inclusión de la cuarta permite capturar un 10%
+adicional de variabilidad, mejorando significativamente la
+representatividad del modelo sin añadir una complejidad excesiva.
+
+Aunque el análisis factorial constituye una alternativa para la
+reducción de dimensionalidad, en este estudio se ha optado por el uso de
+PCA, ya que permite una representación más directa de la variabilidad de
+los datos y resulta más adecuado como paso previo a técnicas de
+clustering.
+
+# 3. IDENTIFICACIÓN DE ARQUETIPOS DE JUGADORES -Análisis Clusters-
+
+## ESTUDIO DE LA TENDENCIA
+
+Antes de aplicar un método de clustering a los datos es conveniente
+evaluar si hay indicios de que realmente existe algún tipo de agrupación
+en ellos. Vamos a aplicar el estadistico de Hopkins para ver si es
+adecuado realizar o no dicho análisis cluster.
+
+```{r}
+datos_para_clustering <- pca2$x[, 1:4]
+set.seed(321)
+hopkins(datos_para_clustering) %>% kable(col.names = "Índice de Hopkins", align = "c")
+```
+
+Como el valor obtenido es muy cercano a 1, existen evidencias a favor de
+que existen agrupaciones en los datos y de que los grupos resultantes
+serán reales. Ahora vamos a realizar un análisis visual de los datos.
+
+```{r}
+dist_datos_clustering <- dist(datos_para_clustering, method = 'euclidean')
+fviz_dist(dist.obj = dist_datos_clustering, show_labels = FALSE) + labs(title = "Distancias de datos para Clustering") +
+    theme(legend.position = "bottom")
+
+```
+
+Aunque hay muchos datos, se pueden distinguir lineas verticales y
+horizontales, creando estructuras rectangulares. Esto respalda los
+resultados obtenidos con el estadístico de Hopkins.
+
+Una vez hemos visto que el método de clustering se puede aplicar con
+sentido, vamos a comparar los métodos de K-means, PAM y CLARA. Como
+hemos obtenido una varianza acumulada del 81,42% con 4 componentes
+principales, vamos a realizar los clusters en el espacio que ya explica
+dicha varianza de los jugadores.
+
+## ANÁLISIS Y COMPARACIÓN DE MÉTODOS DE CLUSTERING
+
+```{r}
+
+p_km <- fviz_nbclust(x = datos_para_clustering, FUNcluster = kmeans, method = "wss", 
+                     k.max = 15, diss = get_dist(datos_para_clustering, method = "euclidean"), nstart = 50) +
+        labs(title = "K-means", x = "k", y = "WSS") +
+        theme_minimal()
+
+p_pam <- fviz_nbclust(x = datos_para_clustering, FUNcluster = pam, method = "wss", 
+                      k.max = 15, diss = get_dist(datos_para_clustering, method = "euclidean")) +
+         labs(title = "PAM", x = "k", y = NULL) + # Quitamos y para no repetir
+         theme_minimal()
+
+p_clara <- fviz_nbclust(x = datos_para_clustering, FUNcluster = clara, method = "wss", 
+                        k.max = 15, diss = get_dist(datos_para_clustering, method = "euclidean")) +
+           labs(title = "CLARA", x = "k", y = NULL) + # Quitamos y para no repetir
+           theme_minimal()
+
+(p_km | p_pam | p_clara) + 
+  plot_annotation(title = "Comparativa del Método del Codo",
+                  subtitle = "Evaluación de la varianza intra-cluster según el algoritmo",
+                  caption = "Basado en las 4 Componentes Principales")
+```
+
+Para todos los métodos, vamos a escoger k=6, ya que nos ofrece una suma
+de Cuadrados Intra-cluster similar para todos los métodos.
+
+```{r}
+
+p_km <- fviz_nbclust(x = datos_para_clustering, FUNcluster = kmeans, method = "silhouette", 
+                     k.max = 15, diss = get_dist(datos_para_clustering, method = "euclidean"), nstart = 50) +
+        labs(title = "K-means", x = "k", y = "Silhouette") +
+        theme_minimal()
+
+p_pam <- fviz_nbclust(x = datos_para_clustering, FUNcluster = pam, method = "silhouette", 
+                      k.max = 15, diss = get_dist(datos_para_clustering, method = "euclidean")) +
+         labs(title = "PAM", x = "k", y = NULL) +
+         theme_minimal()
+
+p_clara <- fviz_nbclust(x = datos_para_clustering, FUNcluster = clara, method = "silhouette", 
+                        k.max = 15, diss = get_dist(datos_para_clustering, method = "euclidean")) +
+           labs(title = "CLARA", x = "k", y = NULL) + 
+           theme_minimal()
+
+(p_km | p_pam | p_clara) + 
+  plot_annotation(title = "Comparativa del Método del Codo",
+                  subtitle = "Evaluación de la media de los coeficientes de silueta según el algoritmo",
+                  caption = "Basado en las 4 Componentes Principales")
+```
+
+Vemos que para todos los métodos, un bajo número de clústers ofrecen una
+mayor media de los coeficientes silueta. Sin embargo, si nos quedáramos
+con k = 2, nuestro objetivo de identificar arquetipos sería muy pobre y
+superficial. Es por eso que a la vista de las gráficas, elegir 6
+clusters nos parece un buen equilibrio entre tener suficientes
+arquetipos de los que poder sacar conclusiones y un valor aceptable de
+los coeficientes de siluetas.
+
+Ahora, creamos todos los clusters y realizamos un análisis Silhouette
+para ver cual de ellos ha funcionado mejor. Para ello, para cada
+cluster, sacamos el coeficiente de silueta de cada observación y
+realizamos la media de todos ellos por cluster.
+
+```{r}
+set.seed(123)
+km_clusters <- kmeans(x = datos_para_clustering, centers = 6, nstart = 50)
+pam_clusters <- pam(x = datos_para_clustering, k = 6, nstart = 50)
+clara_clusters <- clara(x = datos_para_clustering, k = 6, samples = 50)
+
+
+sil_km <- silhouette(km_clusters$cluster, dist(datos_para_clustering))
+sil_pam <- silhouette(pam_clusters$clustering, dist(datos_para_clustering))
+sil_clara <- silhouette(clara_clusters$clustering, dist(datos_para_clustering))
+```
+
+```{r}
+resultados_sil <- data.frame(
+  Algoritmo = c("K-means", "PAM", "CLARA"),
+  `Ancho de Silueta Medio` = c(mean(sil_km[, 3]), mean(sil_pam[, 3]), mean(sil_clara[, 3])))
+
+kable(resultados_sil, align = "c")
+```
+
+Observamos que el algoritmo k-means es el que nos ofrece un mejor
+rendimiento con un valor de 0.2501812, aunque los valores del resto de
+métodos son similares, por eso mismo elegimos el método K-means para
+realizar los clusters.
+
+```{r}
+colores_clusters <- c(
+  "1" = "#D3D3D3", 
+  "2" = "#52B788",
+  "3" = "#B22222", 
+  "4" = "#0077B6", 
+  "5" = "#BE95FF", 
+  "6" = "#FFB703")
+
+fviz_silhouette(sil_km, print.summary = FALSE,
+                ggtheme = theme_classic(), 
+                palette = colores_clusters) +
+  labs(title = "Análisis de Silueta para K-means (NHL)", x = "Jugadores", y = "Coeficiente de silueta")
+```
+
+El gráfico de análisis de silueta para el modelo K-means muestra una
+estructura de seis clústeres con una cohesión interna razonable, donde
+la mayoría de los jugadores presentan coeficientes positivos, lo que
+indica que están correctamente asignados a sus respectivos arquetipos
+tácticos. La línea roja punteada representa la anchura media de la
+silueta (0.25), y se observa que los clústeres 3 (rojo), 4 (azul) y 6
+(amarillo) tienen una proporción significativa de sus miembros por
+encima de este promedio, destacando como grupos especialmente bien
+definidos. Por el contrario, la presencia de pequeñas franjas negativas
+en la base de casi todos los grupos señala la existencia de jugadores en
+zonas de transición que comparten características de múltiples perfiles,
+aunque la escasez de estos valores negativos confirma que la partición
+de seis grupos es robusta y minimiza los errores de clasificación
+individual.
+
+## CLUSTERS JERÁRQUICOS
+
+Tras hacer un analisis con clusters de partición, vamos a compararlos
+con los jerárquicos, donde estableceremos de nuevo k=6
+
+Analizaremos un método aglomerativo y otro divisorio, con los algoritmos
+AGNES y DIANA respectivamente, ambos empleando la distancia euclídea.
+
+```{r}
+# Usamos hcut para realizar el corte y obtener la silueta directamente
+set.seed(123)
+hc_corta_comp  <- hcut(x = datos_para_clustering, k = 6, hc_func = "hclust", hc_method = "complete")
+hc_corta_avg   <- hcut(x = datos_para_clustering, k = 6, hc_func = "hclust", hc_method = "average")
+hc_corta_ward  <- hcut(x = datos_para_clustering, k = 6, hc_func = "hclust", hc_method = "ward.D2")
+hc_corta_diana <- hcut(x = datos_para_clustering, k = 6, hc_func = "diana")
+
+```
+
+```{r}
+resultados_clustering <- data.frame(
+  Metodo = c("AGNES Complete", "AGNES Average", "AGNES Ward", "DIANA"),
+  Silueta_Promedio = c(
+    hc_corta_comp$silinfo$avg.width,
+    hc_corta_avg$silinfo$avg.width,
+    hc_corta_ward$silinfo$avg.width,
+    hc_corta_diana$silinfo$avg.width
+  )
+)
+kable(resultados_clustering, align = "c")
+```
+
+A la vista de los resultados, el algoritmo DIANA es el que ofrece un
+mejor rendimiento con un valor de 0.2561594, superando ligeramente al
+promedio obtenido por K-means (0.2501812).
+
+```{r}
+colores_clusters <- c(
+  "1" = "#D3D3D3", 
+  "2" = "#52B788",
+  "3" = "#B22222", 
+  "4" = "#0077B6", 
+  "5" = "#BE95FF", 
+  "6" = "#FFB703")
+
+# Análisis de silueta para el modelo DIANA
+fviz_silhouette(hc_corta_diana, 
+                print.summary = FALSE,
+                ggtheme = theme_classic(), 
+                palette = colores_clusters) +
+  labs(title = "Análisis de Silueta para DIANA (NHL)", 
+       x = "Jugadores", 
+       y = "Coeficiente de silueta")
+
+```
+
+Aunque el coeficiente de silueta de DIANA es ligeramente superior por
+apenas 0,006, esta diferencia resulta estadísticamente marginal y no
+compensa las ventajas operativas y de estabilidad que ofrece K-means. Al
+observar detenidamente las gráficas de silueta, se aprecia que K-means
+minimiza de forma más eficiente las asignaciones erróneas, presentando
+menos observaciones con valores negativos y evitando el colapso de
+grupos pequeños, como ocurre con el Arquetipo 5 en el método divisorio.
+Además,su definición basada en centroides permite una escalabilidad y
+una facilidad de reclasificación de nuevos jugadores mucho mayor.
+
+Por tanto, la consistencia en la cohesión de los grupos y la eficiencia
+técnica de K-means lo convierten en una opción más fiable y equilibrada
+para definir los arquetipos tácticos de la NHL.
+
+## VISUALIZACIÓN Y ANÁLISIS DE CLUSTERS OBTENIDOS
+
+Ahora, representaremos visualmente los clusters con el método k-means
+respecto a las dos primeras componentes principales:
+
+```{r}
+# 1. Definimos los colores y formas para que sean consistentes
+colores_clusters <- c(
+  "1" = "#D3D3D3", 
+  "2" = "#52B788",
+  "3" = "#B22222", 
+  "4" = "#0077B6", 
+  "5" = "#BE95FF", 
+  "6" = "#FFB703")
+
+# 2. Creamos el gráfico unificado
+fviz_cluster(object = km_clusters, 
+             data = datos_para_clustering, 
+             geom = "point",
+             ellipse.type = "convex",
+             show.clust.cent = TRUE,
+             star.plot = TRUE) +
+  
+  scale_color_manual(name = "Arquetipo Táctico", 
+                     values = colores_clusters) +
+  scale_fill_manual(name = "Arquetipo Táctico", 
+                    values = colores_clusters) +
+  scale_shape_manual(name = "Arquetipo Táctico", 
+                     values = c(15, 16, 17, 18, 19, 21)) +
+  
+  labs(title = "Resultados clustering K-means",
+       x = "PC1: Volumen de Juego / Estrellas", 
+       y = "PC2: Perfil Ofensivo (+) vs Defensivo (-)") +
+  
+  theme_minimal() + 
+  theme(legend.position = "right")
+```
+
+No podemos sacar demasiada información del gráfico ya que viéndolos
+solamente desde dos dimensiones, no se aprecia la verdadera separación
+entre los puntos. Por eso, para definir la identidad de cada arquetipo,
+calculamos los centroides de los seis clusters. La siguiente tabla
+muestra el valor promedio de las cuatro componentes principales en cada
+grupo, lo que nos permite bautizar a cada cluster según su
+comportamiento predominante.
+
+```{r}
+# Calculamos la media de las 4 PCs para cada cluster
+centroides_km <- as.data.frame(km_clusters$centers)
+centroides_km$cluster <- 1:6
+centroides_km %>% kable()
+```
+
+Para un análisis más claro, representaremos esta tabla de manera más
+visual mediante un heatmap:
+
+```{r}
+centroides_km <- as.data.frame(km_clusters$centers)
+centroides_km$cluster <- 1:6
+centroides_km_melt <- melt(centroides_km, id.vars = "cluster")
+
+ggplot(centroides_km_melt, aes(x = as.factor(cluster), y = fct_rev(variable), fill = value)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "#0077B6", high = "#B22222", mid = "white", 
+                       midpoint = 0, name = "Puntuación Media") +
+  geom_text(aes(label = round(value, 2)), size = 4) +
+  theme_minimal() +
+  labs(title = "Perfil Táctico de los Arquetipos (Centroides)",
+       x = "Arquetipo (Clúster)",
+       y = "Componentes Principales",
+       subtitle = "Basado en los scores promedio de las 4 PCs seleccionadas") + 
+  scale_x_discrete(position = "top", expand = c(0,0)) + 
+  scale_y_discrete(expand = c(0,0))
+```
+
+Tras analizar la distribución de los jugadores en el espacio de las
+Componentes Principales (PCs), se identifican 6 perfiles tácticos bien
+diferenciados que explican la estructura de la liga.
+
+Por ejemplo, se diferencian jugadores con gran carga en la PC1 (clúster
+3), esto son jugadores con alta participación ofensiva y volumen de
+juego. Son a priori, el grupo de jugadores franquicia. Por otro lado, se
+observa que el clúster 4 está claramente formado por jugadores de un
+perfil más sacrificado y defensivo, con alta carga negativa en la PC2.
+Además, los valores positivos de la PC1 y la PC3 indican que es el grupo
+de defensas de élite, con un alto volumen de juego y que debido a su
+alto nivel, no necesitan tanta agresividad si no que basan las defensa
+en su talento. A diferencia de ellos encontramos el cluster 5, que está
+compuesto claramente por jugadores con gran capacidad física y una alta
+agresividad (PC3 muy negativa).
+
+También resulta interesante cómo el modelo separa dos tipos de juego
+defensivo. Mientras el clúster 4 parece representar a los defensas de
+élite que dominan por posicionamiento y volumen de minutos, el clúster 2
+se queda en una zona de volumen bajo pero con una PC2 muy negativa. Esto
+indica que el algoritmo distingue perfectamente entre un defensor 'top'
+y un especialista que entra en situaciones específicas solo para
+bloquear tiros y defender el resultado.
+
+Se observa además que el clúster 6 ocupa un lugar interesante: tienen
+una carga positiva en la PC2 pero un volumen (PC1) mucho más discreto
+que los jugadores estrella. Esto sugiere que son especialistas;
+jugadores que quizás no pasan tanto tiempo en el hielo, pero que cuando
+están, tienen un rol claramente orientado a buscar la portería rival.
+Por último, el bajo valor del clúster 1 en la PC1 nos lleva a pensar que
+son los jugadores de un nivel más bajo y con muy poca participación en
+el juego.
+
+A continuación procedemos a la explicación de cada arquetipo trasladando
+el análisis de nuevo a las variables originales (goles, asistencias,
+bloqueos, etc.). Creemos que este paso es fundamental para dotar de
+interpretabilidad al estudio, permitiendo que entrenadores, analistas
+deportivos o gente no experta (quienes no necesariamente dominan el
+lenguaje estadístico del PCA) puedan validar, aplicar e interpretar los
+diferentes perfiles tácticos obtenidos en el contexto real del juego.
+
+```{r}
+data_con_clusters <- data_jugadores %>%
+  mutate(Cluster_Final = as.factor(km_clusters$cluster))
+
+orden_logico <- c("Goles", "Asistencias", "Tiros", 
+                  "Perdidas", "Bloqueos", 
+                  "Hits", "Robos", "Penalizaciones", 
+                  "Minutos")
+# 1. Definición de la paleta Pro-Analytics (Tonos ajustados y claros)
+
+mis_colores <- c(
+  # ATAQUE
+  "Goles"          = "#B22222", 
+  "Asistencias"    = "#FFB703", 
+  "Tiros"          = "#FF8C00", 
+  # DEFENSA
+  "Bloqueos"       = "#0077B6", 
+  "Robos"          = "#ADE8F4", 
+  "Hits"           = "#00B4D8", 
+  "Perdidas"       = "#BE95FF", 
+  # TIEMPO Y DISCIPLINA
+  "Minutos"        = "#52B788", 
+  "Penalizaciones" = "#B7E4C7"
+)
+
+
+# 2. Preparamos el resumen con este orden
+resumen_radar_limpio <- data_con_clusters %>%
+  group_by(Cluster_Final) %>%
+  summarise(
+    Goles = mean(goals, na.rm = TRUE),
+    Asistencias = mean(assists, na.rm = TRUE),
+    Tiros = mean(shots, na.rm = TRUE),
+    Robos = mean(takeaways, na.rm = TRUE),
+    Perdidas = mean(giveaways, na.rm = TRUE),
+    Hits = mean(hits, na.rm = TRUE),
+    Bloqueos = mean(blocked, na.rm = TRUE),
+    Penalizaciones = mean(penaltyMinutes, na.rm = TRUE),
+    Minutos = mean(timeOnIce, na.rm = TRUE)) %>%
+  # Normalizamos 0-1
+  mutate(across(-Cluster_Final, ~ scales::rescale(., to = c(0, 1)))) %>%
+  pivot_longer(cols = -Cluster_Final, names_to = "Variable", values_to = "Valor") %>%
+  mutate(Variable = factor(Variable, levels = orden_logico))
+
+# 3. Gráfico de Rosas
+ggplot(resumen_radar_limpio, aes(x = Variable, y = Valor, fill = Variable)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar() +
+  facet_wrap(~ Cluster_Final, labeller = label_both) +
+  scale_fill_manual(values = mis_colores) +  theme_minimal() +
+  labs(
+    title = "Radiografía Táctica: Perfiles por Arquetipo",
+    subtitle = "Comparativa de medias normalizadas (Temporada 2018-2019)",
+    x = NULL, y = NULL
+  ) +
+  theme(
+    axis.text.x = element_text(size = 7),
+    axis.text.y = element_blank(),
+    legend.position = "none",
+    strip.background = element_rect(fill = "gray95")
+  )
+```
+
+En el espacio de las variables originales, la interpretación resulta más
+sencilla lo cual nos permite darle un nombre más claro a nuestros
+arquetipos tácticos y definirlos de manera más precisa usando tanto la
+información obtenida en el espacio de las PCA como la interpretación de
+estadísticas mas sencillas como goles, asistencias, tiros bloqueados...
+
+**1. Benchwarmers**
+
+**2. Bloqueadores defensivos**
+
+**3. Superestrellas Ofensivas**
+
+**4. Muros de Élite**
+
+**5. Especialistas Físicos**
+
+**6. Jugadores de Rotación**
+
+```{r}
+data_jugadores_con_clusters <- cbind(data_con_clusters, pca2$x)
+data_norm_global <- data_jugadores_con_clusters %>%
+  mutate(across(c(goals, assists, shots, blocked, takeaways, hits, giveaways, timeOnIce, penaltyMinutes), ~ scales::rescale(.x)))
+```
+
+#### CLUSTER 1: Benchwarmers
+
+```{r}
+cluster_a_ver <- "1"
+
+ggplot(resumen_radar_limpio %>% filter(Cluster_Final == cluster_a_ver), 
+       aes(x = Variable, y = Valor, fill = Variable)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar() +
+  scale_fill_manual(values = mis_colores) +
+  theme_minimal() +
+  labs(title = paste("CLUSTER 1: Benchwarmers")) +
+  theme(legend.position = "none")
+```
+
+Este grupo se caracteriza por tener el valor más bajo de volumen de
+juego. Son jugadores con una participación muy limitada en el hielo y
+estadísticas discretas en todas las áreas. Aunque muestran una ligera
+tendencia ofensiva, su impacto real en el juego es mínimo debido a la
+falta de minutos.
+
+A continuación mostramos 5 jugadores que son ejemplos representativos de
+este arquetipo.
+
+```{r}
+data_cluster1 <- data_jugadores_con_clusters %>% filter(Cluster_Final == "1")
+centroide_c1 <- km_clusters$centers[1, ]
+
+
+pcs_nombres <- colnames(km_clusters$centers)
+
+
+
+# Calcular la distancia euclidiana en el espacio de las PCs
+data_cluster1$distancia_centroide <- apply(data_cluster1[, pcs_nombres], 1, function(fila) {sqrt(sum((fila - centroide_c1)^2))})
+
+# Ordenar: los más cercanos al centro son los "Prototipos"
+jugadores_representativos_1 <- data_cluster1 %>% 
+  arrange(distancia_centroide) %>%
+  select(firstName, lastName, nationality, primaryPosition, goals, assists, shots, hits, blocked, takeaways, giveaways, penaltyMinutes, timeOnIce, plusMinus, faceOffRatio, partidos_jugados) %>%
+  head(5)
+
+jugadores_representativos_1 %>% kable()
+```
+
+```{r}
+# Seleccionamos solo las variables de juego + el nombre
+top5_1 <- data_norm_global %>% 
+  filter(Cluster_Final == "1")
+
+
+top5_1$distancia_centroide <- apply(data_cluster1[, pcs_nombres], 1, function(fila) {sqrt(sum((fila - centroide_c1)^2))})
+
+jugadores_representativos_long <-  top5_1 %>%
+  arrange(distancia_centroide) %>%
+  head(5)  %>%
+  select(lastName, goals, assists, shots, blocked, takeaways, hits, giveaways, timeOnIce, penaltyMinutes) %>%
+  rename(Goles = goals, Asistencias = assists, Tiros = shots, 
+         Bloqueos = blocked, Robos = takeaways, Hits = hits, 
+         Perdidas = giveaways, Minutos = timeOnIce, Penalizaciones = penaltyMinutes) %>%
+  pivot_longer(-lastName, names_to = "Variable", values_to = "Valor") %>%
+  mutate(Variable = factor(Variable, levels = orden_logico))
+
+
+ggplot(jugadores_representativos_long, aes(x = Variable, y = Valor, fill = Variable)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar() +
+  facet_wrap(~ lastName) + # Esto crea los 5 mini-gráficos
+  scale_fill_manual(values = mis_colores) + 
+  scale_y_continuous(limits = c(0, 1)) +
+  theme_minimal() +
+  labs(
+    title = "5 Jugadores Representativos del Arqeutipo 1",
+    subtitle = "Basado en la cercanía al centroide del Cluster (Datos Normalizados)",
+    x = NULL, y = NULL) +
+  theme(
+    axis.text.x = element_text(size = 7, angle = 0),
+    axis.text.y = element_blank(),
+    strip.background = element_rect(fill = "gray95"),
+    strip.text = element_text(face = "bold"),
+    legend.position = "none"
+  )
+```
+
+Vemos que los gráficos de rosas de estos 5 jugadores son muy similares
+mostrando un volumen de minutos reducido y una producción ofensiva
+discreta.
+
+Nombres como **Eric Fehr** o **Colby Cave** validan externamente el
+modelo, ya que sus carreras se han definido por la fiabilidad en roles
+de apoyo y veteranía en líneas de contención.
+
+#### CLUSTER 2: Bloqueadores defensivos
+
+```{r}
+cluster_a_ver <- "2"
+
+ggplot(resumen_radar_limpio %>% filter(Cluster_Final == cluster_a_ver), 
+       aes(x = Variable, y = Valor, fill = Variable)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar() +
+  scale_fill_manual(values = mis_colores) +
+  theme_minimal() +
+  labs(title = paste("CLUSTER 2: Bloqueadores defensivos")) +
+  theme(legend.position = "none")
+
+```
+
+Con un perfil puramente defensivo y una carga de minutos limitada, este
+arquetipo define a los defensores de rotación. Son perfiles
+conservadores que el entrenador despliega en situaciones de riesgo, como
+las inferioridades numéricas, priorizando el bloqueo de tiros y la
+seguridad por encima de cualquier aportación creativa.
+
+```{r}
+# 1. Definimos el ID del cluster que queremos analizar
+cluster_id <- 2
+
+# 2. Filtramos el cluster y extraemos SU centroide específico
+data_cluster2 <- data_jugadores_con_clusters %>% filter(Cluster_Final == cluster_id)
+centroide_c2 <- km_clusters$centers[cluster_id, ] 
+
+# 3. Calculamos la distancia 
+data_cluster2$distancia_centroide <- apply(data_cluster2[, pcs_nombres], 1, function(fila) {
+  sqrt(sum((fila - centroide_c2)^2))
+})
+
+# 4. Seleccionamos los 5 prototipos del Cluster 2
+jugadores_representativos_2 <- data_cluster2 %>% 
+  arrange(distancia_centroide) %>%
+  select(firstName, lastName, nationality, primaryPosition, goals, assists, 
+         shots, hits, blocked, takeaways, giveaways, penaltyMinutes, 
+         timeOnIce, plusMinus, faceOffRatio, partidos_jugados) %>%
+  head(5)
+
+# 5. Visualizamos
+jugadores_representativos_2 %>% kable()
+```
+
+```{r}
+# Seleccionamos solo las variables de juego + el nombre
+top5_2 <- data_norm_global %>% 
+  filter(Cluster_Final == "2")
+
+
+top5_2$distancia_centroide <- apply(data_cluster2[, pcs_nombres], 1, function(fila) {sqrt(sum((fila - centroide_c2)^2))})
+
+jugadores_representativos_long <-  top5_2 %>%
+  arrange(distancia_centroide) %>%
+  head(5)  %>%
+  select(lastName, goals, assists, shots, blocked, takeaways, hits, giveaways, timeOnIce, penaltyMinutes) %>%
+  rename(Goles = goals, Asistencias = assists, Tiros = shots, 
+          Robos = takeaways, Perdidas = giveaways, Hits = hits, Bloqueos = blocked,  Penalizaciones = penaltyMinutes, Minutos = timeOnIce) %>%
+  pivot_longer(-lastName, names_to = "Variable", values_to = "Valor") %>%
+  mutate(Variable = factor(Variable, levels = orden_logico))
+
+ggplot(jugadores_representativos_long, aes(x = Variable, y = Valor, fill = Variable)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar() +
+  facet_wrap(~ lastName) + # Esto crea los 5 mini-gráficos
+  scale_fill_manual(values = mis_colores) + 
+  scale_y_continuous(limits = c(0, 1)) +
+  theme_minimal() +
+  labs(
+    title = "5 Jugadores Representativos del Arqeutipo 2",
+    subtitle = "Basado en la cercanía al centroide del Cluster (Datos Normalizados)",
+    x = NULL, y = NULL) +
+  theme(
+    axis.text.x = element_text(size = 7, angle = 0),
+    axis.text.y = element_blank(),
+    strip.background = element_rect(fill = "gray95"),
+    strip.text = element_text(face = "bold"),
+    legend.position = "none"
+  )
+
+```
+
+En los perfiles representativos de este segundo arquetipo, se observa
+una especialización defensiva extrema y uniforme. El gráfico de cada
+jugador destaca por un pico pronunciado y dominante en la variable de
+bloqueos, acompañado de una presencia casi nula en estadísticas
+ofensivas como goles o asistencias.
+
+Jugadores como **Claesson** o **McCabe** encajan perfectamente aquí, ya
+que son conocidos en la liga por ser defensores de corte defensivo puro,
+lo que valida empíricamente estos resultados.
+
+#### CLUSTER 3: Superestrellas ofensivas
+
+```{r}
+cluster_a_ver <- "3"
+
+ggplot(resumen_radar_limpio %>% filter(Cluster_Final == cluster_a_ver), 
+       aes(x = Variable, y = Valor, fill = Variable)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar() +
+  scale_fill_manual(values = mis_colores) +
+  theme_minimal() +
+  labs(title = paste("CLUSTER 3: Superestrellas ofensivas")) +
+  theme(legend.position = "none")
+```
+
+Aquí es donde encontramos a los jugadores franquicia de la liga.
+Presentan el valor más alto en volumen de juego, lo que refleja que son
+los que más tiempo pasan en el hielo y más jugadas protagonizan. Su
+perfil es marcadamente ofensivo, destacando sobre todo por su capacidad
+para generar goles y asistencias.
+
+```{r}
+# 1. Definimos el ID del cluster que queremos analizar
+cluster_id <- 3
+
+# 2. Filtramos el cluster y extraemos SU centroide específico
+data_cluster3 <- data_jugadores_con_clusters %>% filter(Cluster_Final == cluster_id)
+centroide_c3 <- km_clusters$centers[cluster_id, ] 
+
+# 3. Calculamos la distancia 
+data_cluster3$distancia_centroide <- apply(data_cluster3[, pcs_nombres], 1, function(fila) {
+  sqrt(sum((fila - centroide_c3)^2))
+})
+
+# 4. Seleccionamos los 5 prototipos del Cluster 2
+jugadores_representativos_3 <- data_cluster3 %>% 
+  arrange(distancia_centroide) %>%
+  select(firstName, lastName, nationality, primaryPosition, goals, assists, 
+         shots, hits, blocked, takeaways, giveaways, penaltyMinutes, 
+         timeOnIce, plusMinus, faceOffRatio, partidos_jugados) %>%
+  head(5)
+
+# 5. Visualizamos
+jugadores_representativos_3 %>% kable()
+```
+
+```{r}
+# Seleccionamos solo las variables de juego + el nombre
+top5_3 <- data_norm_global %>% 
+  filter(Cluster_Final == "3")
+
+
+top5_3$distancia_centroide <- apply(data_cluster3[, pcs_nombres], 1, function(fila) {sqrt(sum((fila - centroide_c3)^2))})
+
+jugadores_representativos_long <-  top5_3 %>%
+  arrange(distancia_centroide) %>%
+  head(5)  %>%
+  select(lastName, goals, assists, shots, blocked, takeaways, hits, giveaways, timeOnIce, penaltyMinutes) %>%
+  rename(Goles = goals, Asistencias = assists, Tiros = shots, 
+          Robos = takeaways, Perdidas = giveaways, Hits = hits, Bloqueos = blocked,  Penalizaciones = penaltyMinutes, Minutos = timeOnIce) %>%
+  pivot_longer(-lastName, names_to = "Variable", values_to = "Valor") %>%
+  mutate(Variable = factor(Variable, levels = orden_logico))
+
+ggplot(jugadores_representativos_long, aes(x = Variable, y = Valor, fill = Variable)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar() +
+  facet_wrap(~ lastName) + # Esto crea los 5 mini-gráficos
+  scale_fill_manual(values = mis_colores) + 
+  scale_y_continuous(limits = c(0, 1)) +
+  theme_minimal() +
+  labs(
+    title = "5 Jugadores Representativos del Arqeutipo 3",
+    subtitle = "Basado en la cercanía al centroide del Cluster (Datos Normalizados)",
+    x = NULL, y = NULL) +
+  theme(
+    axis.text.x = element_text(size = 7, angle = 0),
+    axis.text.y = element_blank(),
+    strip.background = element_rect(fill = "gray95"),
+    strip.text = element_text(face = "bold"),
+    legend.position = "none"
+  )
+```
+
+Estos perfiles muestran la huella característica de los jugadores
+franquicia de la liga. A diferencia de otros grupos, estos gráficos de
+rosas presentan una expansión equilibrada y masiva en todas las
+dimensiones positivas: altos niveles de Goles, Asistencias y Tiros,
+sustentados por una carga máxima de Minutos.
+
+Esta visualización confirma la identidad de la élite ofensiva: jugadores
+que no solo destacan en una faceta, sino que dominan el volumen de juego
+completo. Nombres como **Couturier**, **Scheifele** o **Toews** validan
+el modelo, ya que representan a jugadores de primera línea con una
+capacidad única para generar peligro constante, asumiendo la mayor
+responsabilidad táctica de sus respectivos equipos.
+
+#### CLUSTER 4: Muros de élite
+
+```{r}
+cluster_a_ver <- "4"
+
+ggplot(resumen_radar_limpio %>% filter(Cluster_Final == cluster_a_ver), 
+       aes(x = Variable, y = Valor, fill = Variable)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar() +
+  scale_fill_manual(values = mis_colores) +
+  theme_minimal() +
+  labs(title = paste("CLUSTER 4: Muros de élite")) +
+  theme(legend.position = "none")
+
+```
+
+Este clúster agrupa a la élite defensiva de la NHL. Son jugadores
+estrella con una altísima carga de minutos pero, a diferencia de los
+delanteros, su valor en la segunda componente es el más puramente
+defensivo de todo el dataset. Son los encargados de frenar a las
+estrellas rivales y liderar el juego físico de sus equipos.
+
+```{r}
+# 1. Definimos el ID del cluster que queremos analizar
+cluster_id <- 4
+
+# 2. Filtramos el cluster y extraemos SU centroide específico
+data_cluster4 <- data_jugadores_con_clusters %>% filter(Cluster_Final == cluster_id)
+centroide_c4 <- km_clusters$centers[cluster_id, ] 
+
+# 3. Calculamos la distancia 
+data_cluster4$distancia_centroide <- apply(data_cluster4[, pcs_nombres], 1, function(fila) {
+  sqrt(sum((fila - centroide_c4)^2))
+})
+
+# 4. Seleccionamos los 5 prototipos del Cluster 2
+jugadores_representativos_4 <- data_cluster4 %>% 
+  arrange(distancia_centroide) %>%
+  select(firstName, lastName, nationality, primaryPosition, goals, assists, 
+         shots, hits, blocked, takeaways, giveaways, penaltyMinutes, 
+         timeOnIce, plusMinus, faceOffRatio, partidos_jugados) %>%
+  head(5)
+
+# 5. Visualizamos
+jugadores_representativos_4 %>% kable()
+```
+
+```{r}
+# Seleccionamos solo las variables de juego + el nombre
+top5_4 <- data_norm_global %>% 
+  filter(Cluster_Final == "4")
+
+
+top5_4$distancia_centroide <- apply(data_cluster4[, pcs_nombres], 1, function(fila) {sqrt(sum((fila - centroide_c4)^2))})
+
+jugadores_representativos_long <-  top5_4 %>%
+  arrange(distancia_centroide) %>%
+  head(5)  %>%
+  select(lastName, goals, assists, shots, blocked, takeaways, hits, giveaways, timeOnIce, penaltyMinutes) %>%
+  rename(Goles = goals, Asistencias = assists, Tiros = shots, 
+          Robos = takeaways, Perdidas = giveaways, Hits = hits, Bloqueos = blocked,  Penalizaciones = penaltyMinutes, Minutos = timeOnIce) %>%
+  pivot_longer(-lastName, names_to = "Variable", values_to = "Valor") %>%
+  mutate(Variable = factor(Variable, levels = orden_logico))
+
+ggplot(jugadores_representativos_long, aes(x = Variable, y = Valor, fill = Variable)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar() +
+  facet_wrap(~ lastName) + # Esto crea los 5 mini-gráficos
+  scale_fill_manual(values = mis_colores) + 
+  scale_y_continuous(limits = c(0, 1)) +
+  theme_minimal() +
+  labs(
+    title = "5 Jugadores Representativos del Arqeutipo 4",
+    subtitle = "Basado en la cercanía al centroide del Cluster (Datos Normalizados)",
+    x = NULL, y = NULL) +
+  theme(
+    axis.text.x = element_text(size = 7, angle = 0),
+    axis.text.y = element_blank(),
+    strip.background = element_rect(fill = "gray95"),
+    strip.text = element_text(face = "bold"),
+    legend.position = "none"
+  )
+```
+
+Los perfiles representados confirman visualmente la definición de este
+clúster como la élite defensiva de la liga. En todos los gráficos
+destaca una carga de Minutos máxima, lo que ratifica su estatus de
+jugadores de primera línea. A diferencia de los especialistas
+bloqueadores, estos jugadores muestran una huella más amplia y
+equilibrada: dominan los Bloqueos y los Robos, pero también mantienen
+una presencia notable en Asistencias y Tiros.
+
+Esta morfología táctica describe a defensores de alto impacto que no
+solo frenan a las estrellas rivales, sino que tienen la calidad
+necesaria para iniciar la salida del disco. Nombres como **Ryan Suter**,
+**P.K. Subban** o **Dmitry Orlov** son ejemplos claros de este rol:
+jugadores todoterreno que lideran el tiempo en hielo y cuya influencia
+es fundamental tanto en la solidez física como en la transición del
+juego.
+
+#### **CLUSTER 5: Especialistas Físicos**
+
+```{r}
+cluster_a_ver <- "5"
+
+ggplot(resumen_radar_limpio %>% filter(Cluster_Final == cluster_a_ver), 
+       aes(x = Variable, y = Valor, fill = Variable)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar() +
+  scale_fill_manual(values = mis_colores) +
+  theme_minimal() +
+  labs(title = paste("CLUSTER 5: Especialistas Físicos")) +
+  theme(legend.position = "none")
+
+```
+
+Un perfil muy específico definido por la tercera componente. Son
+jugadores que basan su juego en el contacto, la fricción y la protección
+del equipo. Al igual que los jugadores de rotación, suelen tener poco
+tiempo de juego, lo que confirma que su entrada en la pista responde a
+situaciones tácticas muy concretas de carácter físico.
+
+```{r}
+# 1. Definimos el ID del cluster que queremos analizar
+cluster_id <- 5
+
+# 2. Filtramos el cluster y extraemos SU centroide específico
+data_cluster5 <- data_jugadores_con_clusters %>% filter(Cluster_Final == cluster_id)
+centroide_c5 <- km_clusters$centers[cluster_id, ] 
+
+# 3. Calculamos la distancia 
+data_cluster5$distancia_centroide <- apply(data_cluster5[, pcs_nombres], 1, function(fila) {
+  sqrt(sum((fila - centroide_c5)^2))
+})
+
+# 4. Seleccionamos los 5 prototipos del Cluster 2
+jugadores_representativos_5 <- data_cluster5 %>% 
+  arrange(distancia_centroide) %>%
+  select(firstName, lastName, nationality, primaryPosition, goals, assists, 
+         shots, hits, blocked, takeaways, giveaways, penaltyMinutes, 
+         timeOnIce, plusMinus, faceOffRatio, partidos_jugados) %>%
+  head(5)
+
+# 5. Visualizamos
+jugadores_representativos_5 %>% kable()
+```
+
+```{r}
+# Seleccionamos solo las variables de juego + el nombre
+top5_5 <- data_norm_global %>% 
+  filter(Cluster_Final == "5")
+
+
+top5_5$distancia_centroide <- apply(data_cluster5[, pcs_nombres], 1, function(fila) {sqrt(sum((fila - centroide_c5)^2))})
+
+jugadores_representativos_long <-  top5_5 %>%
+  arrange(distancia_centroide) %>%
+  head(5)  %>%
+  select(lastName, goals, assists, shots, blocked, takeaways, hits, giveaways, timeOnIce, penaltyMinutes) %>%
+  rename(Goles = goals, Asistencias = assists, Tiros = shots, 
+          Robos = takeaways, Perdidas = giveaways, Hits = hits, Bloqueos = blocked,  Penalizaciones = penaltyMinutes, Minutos = timeOnIce) %>%
+  pivot_longer(-lastName, names_to = "Variable", values_to = "Valor") %>%
+  mutate(Variable = factor(Variable, levels = orden_logico))
+
+ggplot(jugadores_representativos_long, aes(x = Variable, y = Valor, fill = Variable)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar() +
+  facet_wrap(~ lastName) + # Esto crea los 5 mini-gráficos
+  scale_fill_manual(values = mis_colores) + 
+  scale_y_continuous(limits = c(0, 1)) +
+  theme_minimal() +
+  labs(
+    title = "5 Jugadores Representativos del Arquetipo 5",
+    subtitle = "Basado en la cercanía al centroide del Cluster",
+    x = NULL, y = NULL) +
+  theme(
+    axis.text.x = element_text(size = 7, angle = 0),
+    axis.text.y = element_blank(),
+    strip.background = element_rect(fill = "gray95"),
+    strip.text = element_text(face = "bold"),
+    legend.position = "none"
+  )
+```
+
+Los gráficos de estos jugadores revelan una especialización táctica
+agresiva y sumamente consistente entre sus representantes. El gráfico de
+cada jugador muestra un pico desproporcionado y dominante en la métrica
+de Hits (cargas legales), que eclipsa casi por completo al resto de
+variables estadísticas.
+
+Este patrón visual ratifica que estamos ante un perfil muy físico. A
+diferencia de los atacantes de volumen, su valor no reside en la
+acumulación de puntos, sino en la capacidad de alterar el ritmo del
+partido mediante el contacto físico y la intimidación. Nombres como
+**Cal Clutterbuck** o **Noel Acciari** personifican este rol a la
+perfección: jugadores que, en turnos limitados de juego, maximizan el
+impacto físico para desgastar al rival y proteger la integridad del
+equipo.
+
+#### CLUSTER 6: Jugadores de rotación
+
+```{r}
+cluster_a_ver <- "6"
+
+ggplot(resumen_radar_limpio %>% filter(Cluster_Final == cluster_a_ver), 
+       aes(x = Variable, y = Valor, fill = Variable)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar() +
+  scale_fill_manual(values = mis_colores) +
+  theme_minimal() +
+  labs(title = paste("CLUSTER 6: Jugadores de rotación")) +
+  theme(legend.position = "none")
+```
+
+Representan el equilibrio en el ataque. Con valores positivos moderados
+tanto en volumen como en ofensiva, se identifican como delanteros
+complementarios. Son piezas fundamentales que aportan consistencia y
+profundidad a sus plantillas.
+
+```{r}
+# 1. Definimos el ID del cluster que queremos analizar
+cluster_id <- 6
+
+# 2. Filtramos el cluster y extraemos SU centroide específico
+data_cluster6 <- data_jugadores_con_clusters %>% filter(Cluster_Final == cluster_id)
+centroide_c6 <- km_clusters$centers[cluster_id, ] 
+
+# 3. Calculamos la distancia
+data_cluster6$distancia_centroide <- apply(data_cluster6[, pcs_nombres], 1, function(fila) {
+  sqrt(sum((fila - centroide_c6)^2))
+})
+
+# 4. Seleccionamos los 5 prototipos del Cluster 2
+jugadores_representativos_6 <- data_cluster6 %>% 
+  arrange(distancia_centroide) %>%
+  select(firstName, lastName, nationality, primaryPosition, goals, assists, 
+         shots, hits, blocked, takeaways, giveaways, penaltyMinutes, 
+         timeOnIce, plusMinus, faceOffRatio, partidos_jugados) %>%
+  head(5)
+
+# 5. Visualizamos
+jugadores_representativos_6 %>% kable()
+```
+
+```{r}
+# Seleccionamos solo las variables de juego + el nombre
+top5_6 <- data_norm_global %>% 
+  filter(Cluster_Final == "6")
+
+
+top5_6$distancia_centroide <- apply(data_cluster6[, pcs_nombres], 1, function(fila) {sqrt(sum((fila - centroide_c6)^2))})
+
+jugadores_representativos_long <-  top5_6 %>%
+  arrange(distancia_centroide) %>%
+  head(5)  %>%
+  select(lastName, goals, assists, shots, blocked, takeaways, hits, giveaways, timeOnIce, penaltyMinutes) %>%
+  rename(Goles = goals, Asistencias = assists, Tiros = shots, 
+          Robos = takeaways, Perdidas = giveaways, Hits = hits, Bloqueos = blocked,  Penalizaciones = penaltyMinutes, Minutos = timeOnIce) %>%
+  pivot_longer(-lastName, names_to = "Variable", values_to = "Valor") %>%
+  mutate(Variable = factor(Variable, levels = orden_logico))
+
+ggplot(jugadores_representativos_long, aes(x = Variable, y = Valor, fill = Variable)) +
+  geom_bar(stat = "identity", width = 1, color = "white") +
+  coord_polar() +
+  facet_wrap(~ lastName) + # Esto crea los 5 mini-gráficos
+  scale_fill_manual(values = mis_colores) + 
+  scale_y_continuous(limits = c(0, 1)) +
+  theme_minimal() +
+  labs(
+    title = "5 Jugadores Representativos del Arqeutipo 6",
+    subtitle = "Basado en la cercanía al centroide del Cluster (Datos Normalizados)",
+    x = NULL, y = NULL) +
+  theme(
+    axis.text.x = element_text(size = 7, angle = 0),
+    axis.text.y = element_blank(),
+    strip.background = element_rect(fill = "gray95"),
+    strip.text = element_text(face = "bold"),
+    legend.position = "none"
+  )
+```
+
+En estos jugadores se aprecia una morfología táctica muy equilibrada que
+justifica su rol de aportar profunidad al equipo. A diferencia de las
+superestrellas, sus gráficos de rosas muestran una distribución armónica
+donde destacan valores sólidos en Goles, Asistencias y Robos, pero sin
+los picos de volumen extremo de las primeras líneas.
+
+Esta visualización pone nombre y apellidos a la clase media de la NHL:
+jugadores polivalentes capaces de cumplir en múltiples situaciones de
+juego. Hombres como **Tyler Bozak**, **Jared McCann** o **Jimmy Vesey**
+personifican esta estabilidad; son patinadores que garantizan que el
+nivel competitivo no decaiga durante las rotaciones, aportando un
+peligro secundario que suele ser el factor diferencial en las rachas
+ganadoras de las franquicias.
+
+## ANÁLISIS DE JUGADORES POR CLÚSTER
+
+Tras haber definido matemáticamente la identidad de nuestros seis
+arquetipos mediante las Componentes Principales y validado su perfil
+táctico a través de los gráficos de rosas, el siguiente paso es
+confrontar este modelo con la estructura tradicional de la NHL.
+
+El objetivo de este apartado es responder a una pregunta fundamental:
+¿Cómo se distribuyen las posiciones oficiales clásicas (Centro, Alero
+Izquierdo, Alero Derecho y Defensa) dentro de nuestras nuevas categorías
+basadas en el rendimiento?
+
+A través del análisis porcentual y la normalización cruzada de los
+datos, evaluaremos si las etiquetas que las franquicias asignan a sus
+jugadores dictan realmente su estilo de juego, o si, por el contrario,
+nuestros arquetipos logran aislar funciones tácticas que trascienden la
+simple posición del patinador.
+
+```{r}
+# 1. Calculamos los porcentajes de LW, RW, C y D por cada uno de tus 6 clusters
+posicion_por_cluster <- data_con_clusters %>%
+  group_by(Cluster_Final, primaryPosition) %>%
+  filter(primaryPosition %in% c("C", "LW", "RW", "D")) %>% # Filtramos posiciones estándar
+  tally() %>%
+  group_by(Cluster_Final) %>%
+  mutate(porcentaje = (n / sum(n)) * 100)
+
+# 2. Gráfico de barras apiladas al 100%
+ggplot(posicion_por_cluster, aes(x = Cluster_Final, y = porcentaje, fill = primaryPosition)) +
+  geom_bar(stat = "identity", position = "stack", color = "white") +
+  geom_text(aes(label = ifelse(porcentaje > 5, paste0(round(porcentaje, 0), "%"), "")), 
+            position = position_stack(vjust = 0.5), size = 3, color = "white", fontface = "bold") +
+  scale_fill_manual(values = c("C" = "#1b9e77", "D" = "#d95f02", "LW" = "#7570b3", "RW" = "#e7298a")) +
+  labs(title = "Composición Táctica: Posición Real vs. Arquetipo Estadístico",
+       subtitle = "Distribución de LW, RW, C y D en los 6 clusters identificados",
+       x = "Arquetipo (Cluster)", 
+       y = "Porcentaje dentro del Grupo",
+       fill = "Posición Original") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+```
+
+Vamos a normalizar los datos por posicion para eliminar el sesgo de
+frecuencia derivado de la mayor abundancia de delanteros en la liga,
+permitiendo que el análisis refleje la especialización táctica real y no
+el simple volumen de jugadores.
+
+```{r}
+# 1. Normalizamos
+posicion_intercambiada_norm <- data_con_clusters %>%
+  filter(primaryPosition %in% c("C", "LW", "RW", "D")) %>%
+  group_by(primaryPosition, Cluster_Final) %>%
+  tally() %>%
+  # Paso A: Normalizamos por POSICIÓN 
+  group_by(primaryPosition) %>%
+  mutate(peso_relativo = n / sum(n)) %>%
+  # Paso B: Normalizamos por CLUSTER para que la barra sume 100%
+  group_by(Cluster_Final) %>%
+  mutate(pct_ajustado = (peso_relativo / sum(peso_relativo)) * 100)
+
+# 2. Gráfico con Cluster en el eje X y Posición en la Leyenda
+ggplot(posicion_intercambiada_norm, aes(x = Cluster_Final, y = pct_ajustado, fill = primaryPosition)) +
+  geom_bar(stat = "identity", position = "stack", color = "white") +
+  geom_text(aes(label = ifelse(pct_ajustado > 5, paste0(round(pct_ajustado, 0), "%"), "")), 
+            position = position_stack(vjust = 0.5), size = 3, color = "white", fontface = "bold") +
+  scale_fill_manual(values = c("C" = "#1b9e77", "D" = "#d95f02", "LW" = "#7570b3", "RW" = "#e7298a")) +
+  labs(title = "Composición de Arquetipos Normalizada por Posición",
+       subtitle = "Peso relativo de cada posición en el cluster (Corregido por población total)",
+       x = "Arquetipo (Cluster)", 
+       y = "Peso Normalizado de la Posición (%)",
+       fill = "Posición Original") +
+  theme_minimal() +
+  theme(legend.position = "right")
+```
+
+La validación de los arquetipos mediante la posición original de los
+jugadores confirma una especialización táctica excepcional en el modelo,
+donde los Clusters 2 (Especialistas bloqueadores) y 4 (Muros defensivos)
+operan de forma casi exclusiva con defensas (96% y 99% respectivamente),
+lo que demuestra que el algoritmo ha aislado con éxito el comportamiento
+defensivo puro. En contraste, las Estrellas (Cluster 3) y los Jugadores
+de rotación (Cluster 6) están dominados por delanteros (especialmente
+Centros con un 35%), reflejando que el volumen de juego y la producción
+ofensiva recaen en las posiciones de ataque. Resulta particularmente
+revelador el Cluster 5 (Especialistas físicos), que presenta la
+composición más híbrida de la liga al integrar un 12% de defensas con un
+88% de delanteros (predominando los LW con un 46%), lo que ratifica que
+el rol de "jugador de choque" es una función transversal que trasciende
+la posición nominal, mientras que el Cluster 1 (Benchwarmers) muestra
+una mezcla heterogénea que valida su naturaleza de grupo definido por la
+inactividad y no por una función técnica específica.
+
+Tal y como se ha diferenciado cada uno de los clústers, la siguiente
+gráfica muestra las zonas de la pista donde mayor influencia tiene cada
+arquetipo de jugador:
+
+```{r}
+
+# Colores
+mis_colores <- c(
+  "Esp. Bloqueadores (C2)" = "#52B788",
+  "Superestrellas (C3)"    = "#B22222",
+  "Muros Defensivos (C4)"  = "#0077B6",
+  "Esp. Físicos (C5)"      = "#BE95FF",
+  "Rotación / Two-Way (C6)"= "#FFB703"
+)
+
+mapa_detalle <- data.frame(
+  Arquetipo = names(mis_colores),
+  D =  c(0.98, 0.01, 0.99, 0.20, 0.03),
+  C =  c(0.01, 0.48, 0.01, 0.20, 0.49),
+  LW = c(0.01, 0.20, 0.00, 0.41, 0.28),
+  RW = c(0.00, 0.25, 0.00, 0.20, 0.20)
+) %>%
+  pivot_longer(cols = c(D, C, LW, RW), names_to = "Posicion", values_to = "Porcentaje")
+
+mapa_detalle$Arquetipo <- factor(mapa_detalle$Arquetipo, levels = names(mis_colores))
+
+predominantes_final <- mapa_detalle %>%
+  group_by(Arquetipo) %>%
+  filter(Porcentaje == max(Porcentaje)) %>%
+  ungroup()
+
+# Coordenadas con ajuste manual y filtro de números
+coords <- data.frame(
+  Posicion = c("D", "C", "LW", "RW"),
+  x_base = c(28, 75, 78, 78), 
+  y_base = c(50, 50, 72, 28)
+)
+
+mapa_final <- merge(mapa_detalle, coords, by = "Posicion") %>%
+  mutate(
+    id_num = as.numeric(gsub(".*C(\\d+).*", "\\1", Arquetipo)),
+    angulo = (id_num - 2) * (2 * pi / 5), 
+    radio = 3.5, 
+    x_final = x_base + cos(angulo) * radio,
+    y_final = y_base + sin(angulo) * radio,
+    
+    # Ajuste manual antisolape para D-5
+    y_final = ifelse(Posicion == "D" & id_num == 5, y_final - 2.5, y_final),
+    x_final = ifelse(Posicion == "D" & id_num == 5, x_final - 0.5, x_final),
+    
+    # FILTRO: Borramos los números que flotan sobre círculos casi invisibles
+    etiqueta_num = case_when(
+      Posicion == "D" & id_num %in% c(3, 6) ~ "",
+      Posicion %in% c("LW", "RW", "C") & id_num %in% c(2, 4) ~ "",
+      TRUE ~ as.character(id_num) # El resto se queda igual
+    )
+  )
+
+predominantes_final <- merge(predominantes_final, 
+                             mapa_final[, c("Arquetipo", "Posicion", "x_final", "y_final", "id_num")], 
+                             by = c("Arquetipo", "Posicion"))
+
+# ---------------------------------------------------------
+# CARGAR LA IMAGEN DE FONDO
+# ---------------------------------------------------------
+img <- readPNG("pista.png") # O readJPG("pista.jpg")
+g <- rasterGrob(img, width = unit(1, "npc"), height = unit(1, "npc"), interpolate = TRUE)
+
+# Gráfico Final
+ggplot() +
+  annotation_custom(g, xmin = 0, xmax = 100, ymin = 0, ymax = 100) +
+  
+  # Flecha inferior
+  annotate("segment", x = 40, xend = 60, y = -8, yend = -8, 
+           color = "gray30", linewidth = 1, arrow = arrow(length = unit(0.2, "cm"))) +
+  annotate("text", x = 50, y = -15, label = "SENTIDO DE ATAQUE", fontface = "bold", size = 3, color = "gray30") +
+  
+  # Capa 1: Puntos de color con transparencia
+  geom_point(data = mapa_final, aes(x = x_final, y = y_final, color = Arquetipo, alpha = (Porcentaje+0.2)), size = 9) +
+  
+  # Capa 2: Anillo sólido (Posición predominante)
+  geom_point(data = predominantes_final, aes(x = x_final, y = y_final, color = Arquetipo), 
+             shape = 21, size = 10, stroke = 2, fill = "transparent") +
+  
+  # Capa 3: NÚMEROS (Usando la nueva variable filtrada 'etiqueta_num')
+  geom_text(data = mapa_final, aes(x = x_final, y = y_final, label = etiqueta_num), 
+            color = "gray15", fontface = "bold", size = 4) +
+  
+  scale_color_manual(values = mis_colores) +
+  scale_alpha_continuous(range = c(0, 1), guide = "none") +
+  
+  coord_fixed(xlim = c(0, 100), ylim = c(-20, 100), ratio = 0.6) +
+  
+  theme_void() +
+  theme(legend.position = "right",
+        legend.title = element_blank(),
+        legend.text = element_text(size = 10)) + # Reducimos un poco la fuente si es necesario) +
+  labs(title = "Validación Táctica NHL: Posición Original vs. Arquetipo",
+       subtitle = "Intensidad = Peso en el clúster | Anillo sólido = Posición predominante | Números = Clúster")
+```
+
+# 4. ANÁLISIS ESTRUCTURAL DE LOS EQUIPOS
+
+Primero debemos agregar las tablas necesarias para obtener la
+información de que jugador juega en cada equipo (team_id y player_id)
+con la tabla cargada previamente que contiene los datos obtenidos
+durante el estudio.
+
+```{r}
+# 1. Crear el mapeo de equipo filtrando por la temporada en la tabla 'game'
+suppressWarnings({
+mapping_equipo_1819 <- game_skater_stats %>%
+  inner_join(games %>% select(game_id, season), by = "game_id") %>%
+  filter(season == 20182019) %>%
+  group_by(player_id) %>%
+  summarise(team_id = last(team_id)) %>% 
+  # Traemos los nombres legibles
+  inner_join(team_info %>% select(team_id, teamName), by = "team_id") %>%
+  inner_join(player_info %>% select(player_id, firstName, lastName), by = "player_id") %>%
+  select(firstName, lastName, teamName, team_id)
+
+# 2. Unir con los resultados de clusters
+# Usamos select para quedarnos solo con lo que interesa de los clusters
+data_jugadores_equipo_cluster <- data_jugadores_con_clusters %>%
+  select(firstName, lastName, Cluster_Final) %>%
+  inner_join(mapping_equipo_1819, by = c("firstName", "lastName"))
+})
+```
+
+Antes de todo, vamos a visualizar que porcentaje de cada arquetipo hay
+en la liga.
+
+```{r}
+# 1. Preparamos los datos de toda la liga
+liga_plot <- data_jugadores_equipo_cluster %>% 
+  group_by(Cluster_Final) %>% 
+  tally() %>%
+  mutate(pct = n / sum(n) * 100)
+
+# 2. Generamos el gráfico
+ggplot(liga_plot, aes(x = Cluster_Final, y = pct, fill = Cluster_Final)) +
+  geom_bar(stat = "identity", color = "black") +
+  geom_text(aes(label = paste0(round(pct, 1), "%")), vjust = -0.5, size = 4) +
+  scale_fill_manual(values = colores_clusters) + # Paleta de 6 colores
+  theme_minimal() +
+  labs(title = "Estructura Táctica Global: NHL (Temporada 18-19)",
+       subtitle = "Distribución de arquetipos en el total de jugadores de la liga",
+       x = "Arquetipo (Cluster)", 
+       y = "Porcentaje del Total de Jugadores",
+       fill = "Cluster") +
+  theme(legend.position = "none") 
+```
+
+La estructura de la NHL se divide en tres niveles de participación
+claramente diferenciados, comenzando por un 29.1% de jugadores de
+banquillo (Cluster 1) que apenas tienen impacto en el hielo,
+representando la profundidad extrema de las plantillas. Un segundo
+nivel, el más voluminoso con un 38.5%, lo componen los especialistas de
+rotación activa: los atacantes suplentes (Cluster 6, 21.1%) y los
+defensas suplentes (Cluster 2, 17.4%), quienes actúan como la verdadera
+columna vertebral operativa que permite el descanso de las líneas
+principales. La élite de la liga se concentra en un selecto 31.3%
+formado por las estrellas ofensivas (Cluster 3, 12.3%), defensivas
+(Cluster 4, 10.2%) y como grupo más exclusivo y minoritario a los
+jugadores físicos de contacto (Cluster 5, 9.8%).
+
+Una vez conocida la composición de la liga en base a los arquetipos
+definidos, se puede analizar el perfil de los equipos. Tenemos una
+clasificación de los jugadores desde un punto de vista táctico. Sin
+embargo, en el hockey no juegan individuos, juegan líneas de 3 atacantes
+y parejas de 2 defensas. Por eso, resulta de gran interés saber qué
+diferencia a un equipo campeón del resto o qué combinaciones de
+arquetipos son más beneficiosas para el equipo y cuáles son un desastre
+táctico.
+
+Para ello, primero se debe comprender como funciona el sistema de
+clasificación en la NHL. Este, está dividido en dos fases:
+
+-   La Temporada Regular (President's Trophy): Los 31 equipos compiten
+    en 82 partidos. El éxito aquí se mide por puntos: se otorgan 2
+    puntos por victoria, 1 por derrota en prórroga o shootout, y 0 por
+    derrota en tiempo reglamentario. El equipo con más puntos al final
+    de esta fase gana el President's Trophy, siendo el equipo más sólido
+    y constante.
+
+-   Los Playoffs (Stanley Cup): Los 16 mejores equipos clasifican a las
+    eliminatorias directas. Aquí el éxito es binario: ganar o ser
+    eliminado. El campeón final se alza con la Stanley Cup.
+
+Para este estudio, compararemos la estructura de los dos extremos de la
+tabla de la temporada regular 2018-2019 ya que para gestionar un
+proyecto a largo plazo, consideramos más importante la estabilidad y la
+constancia del equipo. Además, el volumen de datos de 82 partidos nos da
+una imagen más fiel de la construcción de la plantilla que las series
+cortas de Playoffs.
+
+```{r, echo=FALSE, out.width="50%", fig.show='hold'}
+knitr::include_graphics(c("ConferenciaOeste.png", "ConferenciaEste.png"))
+
+```
+
+Como muestra la tabla clasificatoria, el equipo más exitoso en la
+temporada regular fueron los Tampa Bay Lightning. Veamos como estaba
+confeccionada su plantilla:
+
+## EQUIPO CAMPEÓN DE LA FASE REGULAR
+
+#### Tampa Bay Lightning
+
+```{r}
+jugadores_lightning <- data_jugadores_equipo_cluster %>% filter(team_id == 14)
+```
+
+```{r}
+tampa_plot <- jugadores_lightning %>% 
+  group_by(Cluster_Final) %>%
+  tally() %>%
+  mutate(pct = n / sum(n) * 100)
+  
+nombres_arquetipos <- c(
+  "1" = "1. Benchwarmers",
+  "2" = "2. Esp. Bloqueadores",
+  "3" = "3. Superestrellas",
+  "4" = "4. Muros Defensivos",
+  "5" = "5. Esp. Físicos",
+  "6" = "6. Rotación"
+)
+
+ggplot(tampa_plot, aes(x = Cluster_Final, y = pct, fill = Cluster_Final)) +
+  geom_bar(stat = "identity", color = "black") +
+  geom_text(aes(label = paste0(round(pct, 1), "%")), vjust = -0.5, size = 3.5) +
+  theme_minimal() +
+  labs(title = "Estructura Táctica: Tampa Bay Lightning (18-19)",
+       subtitle = "Distribución porcentual de los 6 arquetipos",
+       x = "Arquetipo (Cluster)", 
+       y = "Porcentaje del Roster",
+       fill = "Arquetipos") +
+  scale_fill_manual(values = colores_clusters, labels = nombres_arquetipos) + 
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+```
+
+Vemos que la clave del éxito de este equipo durante la temporada regular
+es la plantilla tan compensada que tienen, con un alto volumen de
+jugadores de rotación. No dependen en exceso de sus estrellas si no que
+el alto nivel de su "clase media" y la profundidad de su plantilla les
+hacía ser un equipo imbatible durante la temporada regular.
+
+## COMPARACIÓN CON EQUIPO DE ZONA BAJA
+
+En contraposición a este equipo que batió récords de puntuación
+encontramos a Ottawa Senators en lo más bajo de la tabla. Comparemos su
+plantilla con la de los campeones:
+
+#### Ottawa Senators
+
+```{r}
+jugadores_ottawa <- data_jugadores_equipo_cluster %>% filter(team_id == 9)
+```
+
+```{r}
+ottawa_plot <- jugadores_ottawa %>% 
+  group_by(Cluster_Final) %>%
+  tally() %>%
+  mutate(pct = n / sum(n) * 100)
+
+# Gráfico de Tampa Bay 
+grafico_tampa <- ggplot(tampa_plot, aes(x = Cluster_Final, y = pct, fill = Cluster_Final)) +
+  geom_bar(stat = "identity", color = "black") +
+  geom_text(aes(label = paste0(round(pct, 1), "%")), vjust = -0.5, size = 3.5) +
+  theme_minimal() +
+  labs(title = "Tampa Bay Lightning",
+       subtitle = "Líder de la Temporada Regular",
+       x = "Arquetipo (Cluster)", 
+       y = "Porcentaje del Roster",
+       fill = "Arquetipos") +
+  # drop = FALSE mantiene la estructura aunque falten datos
+  scale_x_discrete(drop = FALSE) + 
+  scale_fill_manual(values = colores_clusters, labels = nombres_arquetipos, drop = FALSE) + 
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+
+# Gráfico de Ottawa Senators
+grafico_ottawa <- ggplot(ottawa_plot, aes(x = Cluster_Final, y = pct, fill = Cluster_Final)) +
+  geom_bar(stat = "identity", color = "black") +
+  geom_text(aes(label = paste0(round(pct, 1), "%")), vjust = -0.5, size = 3.5) +
+  theme_minimal() +
+  labs(title = "Ottawa Senators",
+       subtitle = "Último de la Temporada Regular",
+       x = "Arquetipo (Cluster)", 
+       y = NULL) + # Quitamos el título del eje Y para que no sea redundante
+  scale_x_discrete(drop = FALSE) + 
+  scale_fill_manual(values = colores_clusters, labels = nombres_arquetipos, drop = FALSE) + 
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        legend.position = "none") # Quitamos aquí la leyenda
+
+# 4. Unión de gráficos 
+(grafico_tampa | grafico_ottawa) +
+  plot_annotation(
+    title = "Comparativa Estructural: Éxito vs Fracaso (18-19)",
+    theme = theme(plot.title = element_text(size = 16, face = "bold"))
+  )
+```
+
+La comparativa entre el líder y el colista evidencia que el éxito no
+solo depende de la profundidad, sino de la presencia crítica de talento
+diferencial. Mientras que Tampa Bay presenta una estructura equilibrada
+donde cada nivel aporta valor, Ottawa sufre una descompensación
+absoluta: carece por completo de superestrellas (Cluster 3: 0%) y su
+plantilla está lastrada por un exceso de jugadores de bajo impacto
+(Cluster 1: 33.3%). Esta diferencia demuestra que, aunque la clase media
+sea necesaria, un equipo sin referentes de élite se convierte en una
+plantilla plana, incapaz de competir contra estructuras optimizadas
+donde la rotación sirve de apoyo a la excelencia y no de sustituto.
+
+## COMPARACIÓN CON LÍDER DEL ESTE
+
+Otra comparación interesante es comparar los campeones de cada
+conferencia. Veamos ahora el equipo líder del este:
+
+#### Calgary Flames
+
+```{r}
+jugadores_flames <- data_jugadores_equipo_cluster %>% filter(team_id == 20)
+```
+
+```{r}
+flames_plot <- jugadores_flames %>% 
+  group_by(Cluster_Final) %>%
+  tally() %>%
+  mutate(pct = n / sum(n) * 100)
+
+# 1. Gráfico de Tampa Bay Lightning
+grafico_tampa_conf <- ggplot(tampa_plot, aes(x = Cluster_Final, y = pct, fill = Cluster_Final)) +
+  geom_bar(stat = "identity", color = "black") +
+  geom_text(aes(label = paste0(round(pct, 1), "%")), vjust = -0.5, size = 3.5) +
+  theme_minimal() +
+  labs(title = "Tampa Bay Lightning",
+       subtitle = "Líder de la Conferencia Este",
+       x = "Arquetipo (Cluster)", 
+       y = "Porcentaje del Roster",
+       fill = "Arquetipos") +
+  scale_x_discrete(drop = FALSE) + 
+  scale_fill_manual(values = colores_clusters, labels = nombres_arquetipos, drop = FALSE) + 
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+  
+# 2. Gráfico de Calgary Flames 
+grafico_flames <- ggplot(flames_plot, aes(x = Cluster_Final, y = pct, fill = Cluster_Final)) +
+  geom_bar(stat = "identity", color = "black") +
+  geom_text(aes(label = paste0(round(pct, 1), "%")), vjust = -0.5, size = 3.5) +
+  theme_minimal() +
+  labs(title = "Calgary Flames",
+       subtitle = "Líder de la Conferencia Oeste",
+       x = "Arquetipo (Cluster)", 
+       y = NULL) + # Quitamos el eje Y
+  scale_x_discrete(drop = FALSE) + 
+  scale_fill_manual(values = colores_clusters, labels = nombres_arquetipos, drop = FALSE) + 
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        legend.position = "none") # Quitamos la leyenda
+
+# 3. Unión de gráficos 
+(grafico_tampa_conf | grafico_flames) +
+  plot_annotation(
+    title = "Comparativa Estructural: Campeones de Conferencia (18-19)",
+    theme = theme(plot.title = element_text(size = 16, face = "bold"))
+  )
+```
+
+Aunque ambos equipos lideraron sus conferencias, sus estructuras
+tácticas revelan perfiles opuestos: Calgary Flames se consolidó como un
+equipo de élite concentrada, con una dependencia mucho mayor de sus
+artilleros (Cluster 3: 24%). Por el contrario, Tampa Bay Lightning
+exhibió una estructura de profundidad total, donde su éxito radicó en
+una clase media hiperactiva y versátil (Cluster 6: 28.6%),
+permitiéndoles mantener un ritmo de juego inalcanzable para el resto de
+la liga.
+
+## COMPARACIÓN CON LOS FINALISTAS DE LA COPA STANLEY
+
+#### St Louis Blues (campeón)
+
+```{r}
+jugadores_blues <- data_jugadores_equipo_cluster %>% filter(team_id == 19)
+```
+
+```{r}
+blues_plot <- jugadores_blues %>% 
+  group_by(Cluster_Final) %>%
+  tally() %>%
+  mutate(pct = n / sum(n) * 100)
+
+# 1. Gráfico de Tampa Bay Lightning 
+grafico_tampa_vs_blues <- ggplot(tampa_plot, aes(x = Cluster_Final, y = pct, fill = Cluster_Final)) +
+  geom_bar(stat = "identity", color = "black") +
+  geom_text(aes(label = paste0(round(pct, 1), "%")), vjust = -0.5, size = 3.5) +
+  theme_minimal() +
+  labs(title = "Tampa Bay Lightning",
+       subtitle = "Líder de la Temporada Regular",
+       x = "Arquetipo (Cluster)", 
+       y = "Porcentaje del Roster",
+       fill = "Arquetipos") +
+  scale_x_discrete(drop = FALSE) + 
+  scale_fill_manual(values = colores_clusters, labels = nombres_arquetipos, drop = FALSE) + 
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+
+# 2. Gráfico de St. Louis Blues 
+grafico_blues <- ggplot(blues_plot, aes(x = Cluster_Final, y = pct, fill = Cluster_Final)) +
+  geom_bar(stat = "identity", color = "black") +
+  geom_text(aes(label = paste0(round(pct, 1), "%")), vjust = -0.5, size = 3.5) +
+  theme_minimal() +
+  labs(title = "St. Louis Blues",
+       subtitle = "Campeón de la Stanley Cup",
+       x = "Arquetipo (Cluster)", 
+       y = NULL) + # Eliminamos título del eje Y
+  scale_x_discrete(drop = FALSE) + 
+  scale_fill_manual(values = colores_clusters, labels = nombres_arquetipos, drop = FALSE) + 
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        legend.position = "none") # Quitamos la leyenda
+
+# 3. Unión de gráficos 
+(grafico_tampa_vs_blues | grafico_blues) +
+  plot_annotation(
+    title = "Comparativa Estructural: Temporada Regular vs Stanley Cup (18-19)",
+    theme = theme(plot.title = element_text(size = 16, face = "bold"))
+  )
+```
+
+La comparativa revela una estructura de éxito casi idéntica, basada en
+una gran dependencia de la clase media de la plantilla (Arquetipo 6,
+rondando el 30%). Mientras que Tampa dominó la fase regular apoyándose
+ligeramente más en el talento puro de sus superestrellas y muros
+defensivos (23.8% combinado frente al 18.5% de St. Louis), los Blues
+compensaron esa diferencia con una base más amplia de jugadores de
+energía y contención. Esta sutil variación estructural ilustra cómo el
+talento de élite facilita el dominio a largo plazo, pero el rigor físico
+de los Playoffs exige una plantilla construida para el desgaste
+continuo.
+
+#### Boston Bruins
+
+```{r}
+jugadores_bruins <- data_jugadores_equipo_cluster %>% filter(team_id == 6)
+```
+
+```{r}
+bruins_plot <- jugadores_bruins %>% 
+  group_by(Cluster_Final) %>%
+  tally() %>%
+  mutate(pct = n / sum(n) * 100)
+
+# 1. Gráfico de Tampa Bay Lightning 
+grafico_tampa_vs_bruins <- ggplot(tampa_plot, aes(x = Cluster_Final, y = pct, fill = Cluster_Final)) +
+  geom_bar(stat = "identity", color = "black") +
+  geom_text(aes(label = paste0(round(pct, 1), "%")), vjust = -0.5, size = 3.5) +
+  theme_minimal() +
+  labs(title = "Tampa Bay Lightning",
+       subtitle = "Líder de la Temporada Regular",
+       x = "Arquetipo (Cluster)", 
+       y = "Porcentaje del Roster",
+       fill = "Arquetipos") +
+  scale_x_discrete(drop = FALSE) + 
+  scale_fill_manual(values = colores_clusters, labels = nombres_arquetipos, drop = FALSE) + 
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+
+# 2. Gráfico de Boston Bruins 
+grafico_bruins <- ggplot(bruins_plot, aes(x = Cluster_Final, y = pct, fill = Cluster_Final)) +
+  geom_bar(stat = "identity", color = "black") +
+  geom_text(aes(label = paste0(round(pct, 1), "%")), vjust = -0.5, size = 3.5) +
+  theme_minimal() +
+  labs(title = "Boston Bruins",
+       subtitle = "Finalista de la Stanley Cup",
+       x = "Arquetipo (Cluster)", 
+       y = NULL) + # Eliminamos título del eje Y
+  scale_x_discrete(drop = FALSE) + 
+  scale_fill_manual(values = colores_clusters, labels = nombres_arquetipos, drop = FALSE) + 
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        legend.position = "none") # Quitamos la leyenda
+
+# 3. Unión de gráficos 
+(grafico_tampa_vs_bruins | grafico_bruins) +
+  plot_annotation(
+    title = "Comparativa Estructural: Temporada Regular vs Finalista (18-19)",
+    theme = theme(plot.title = element_text(size = 16, face = "bold"))
+  )
+```
+
+Al comparar al líder regular con el finalista, la principal diferencia
+radica en la gestión de los minutos. Mientras Tampa distribuye su juego
+apoyándose en una base sólida de jugadores de rotación (28.6%), Boston
+presenta un abrumador 31% de jugadores de banquillo o residuales. Esta
+estructura revela que los Bruins concentraron casi todo el tiempo de
+hielo en un núcleo muy reducido de jugadores que soportaron el peso de
+la franquicia; una estrategia de alta exigencia física que, en este
+caso, funcionó hasta llegar a la final.
+
+## COMPARACIÓN CON UN EQUIPO DE ZONA MEDIA DE LA TABLA
+
+#### Montreal Canadiens
+
+```{r}
+jugadores_canadiens <- data_jugadores_equipo_cluster %>% filter(team_id == 8)
+```
+
+```{r}
+canadiens_plot <- jugadores_canadiens %>% 
+  group_by(Cluster_Final) %>%
+  tally() %>%
+  mutate(pct = n / sum(n) * 100)
+
+# 1. Gráfico de Tampa Bay Lightning 
+grafico_tampa_vs_canadiens <- ggplot(tampa_plot, aes(x = Cluster_Final, y = pct, fill = Cluster_Final)) +
+  geom_bar(stat = "identity", color = "black") +
+  geom_text(aes(label = paste0(round(pct, 1), "%")), vjust = -0.5, size = 3.5) +
+  theme_minimal() +
+  labs(title = "Tampa Bay Lightning",
+       subtitle = "Líder de la Temporada Regular",
+       x = "Arquetipo (Cluster)", 
+       y = "Porcentaje del Roster",
+       fill = "Arquetipos") +
+  scale_x_discrete(drop = FALSE) + 
+  scale_fill_manual(values = colores_clusters, labels = nombres_arquetipos, drop = FALSE) + 
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank())
+
+# 2. Gráfico de Montreal Canadiens 
+grafico_canadiens <- ggplot(canadiens_plot, aes(x = Cluster_Final, y = pct, fill = Cluster_Final)) +
+  geom_bar(stat = "identity", color = "black") +
+  geom_text(aes(label = paste0(round(pct, 1), "%")), vjust = -0.5, size = 3.5) +
+  theme_minimal() +
+  labs(title = "Montreal Canadiens",
+       subtitle = "Equipo de Media Tabla",
+       x = "Arquetipo (Cluster)", 
+       y = NULL) + # Eliminamos título del eje Y
+  scale_x_discrete(drop = FALSE) + 
+  scale_fill_manual(values = colores_clusters, labels = nombres_arquetipos, drop = FALSE) + 
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        legend.position = "none") # Quitamos la leyenda
+
+# 3. Unión de gráficos
+(grafico_tampa_vs_canadiens | grafico_canadiens) +
+  plot_annotation(
+    title = "Comparativa Estructural: Éxito vs Media Tabla (18-19)",
+    theme = theme(plot.title = element_text(size = 16, face = "bold"))
+  )
+```
+
+Al enfrentar al líder con un equipo de media tabla, la diferencia en la
+calidad de la plantilla es evidente. Mientras Tampa exhibe un equilibrio
+armónico en sus líneas, Montreal concentra más del 55% de su roster en
+especialistas de contención (29.6%) y jugadores residuales (25.9%). Esta
+estructura excesivamente conservadora, sumada a su alarmante falta de
+especialistas físicos (3.7%), revela una plantilla con marcadas
+carencias de talento global que se ve forzada a priorizar la destrucción
+del juego rival para sobrevivir en la competición.
+
+# CONCLUSIONES
+
+Este trabajo demuestra que el modelo tradicional de categorización en el
+hockey sobre hielo (Centro, Extremo, Defensa) ha quedado obsoleto frente
+a la complejidad del juego moderno. Se ha visto como, principalmente,
+las tres posiciones de ataque cuentan con jugadores de perfiles tácticos
+muy diferentes. La principal conclusión de este estudio es que la
+posición nominal de un jugador es un indicador insuficiente de su
+verdadera contribución y rol táctico dentro del hielo tanto para los
+miembros de una dirección deportiva, como para staff técnico.
+
+#### A. La Insuficiencia de la Posición Tradicional
+
+Las etiquetas clásicas fallan al agrupar a jugadores con perfiles
+radicalmente distintos. Como se ha observado en la formación de los
+clústeres, un "Defensa" con alta capacidad de salida y visión de juego
+puede compartir más rasgos estadísticos con un "Centro" organizador que
+con su propia pareja de defensa de perfil físico. Seguir planificando
+plantillas basadas en estas etiquetas rígidas genera ineficiencias en el
+mercado y errores en el planteamiento táctico.
+
+#### B. Valor Estratégico para la Dirección Deportiva (Scouting y Mercado)
+
+Para una Dirección Deportiva, utilizar este modelo de clasificación por
+perfiles tácticos ofrece una serie de ventajas competitivas:
+
+-   Identificación de Joyas Ocultas: Permite localizar jugadores en
+    equipos de menor nivel que rinden como "Muros de Élite" o "Estrellas
+    de Producción" pero cuyo valor de mercado es bajo por la falta de
+    puntos tradicionales (Goles/Asistencias).
+
+-   Reemplazo de Perfiles Específicos: Si un equipo pierde a su
+    principal "Especialista Físico", la herramienta permite buscar en el
+    mercado no a cualquier jugador de la misma posición, sino a aquel
+    que replique exactamente el "gráfico de rosa" del jugador saliente.
+
+-   Optimización del Presupuesto: Facilita la detección de sobrecostes,
+    identificando jugadores con salarios de "Superestrella" que, según
+    los datos, están rindiendo en clústeres de "Rotación" o
+    "Benchwarmers".
+
+#### C. Utilidad para el Cuerpo Técnico (Estrategia y Sinergias)
+
+Desde la perspectiva del coaching, este estudio transforma la pizarra:
+
+-   Construcción de Líneas Equilibradas: En lugar de alinear jugadores
+    por inercia, el cuerpo técnico puede diseñar líneas basadas en la
+    complementariedad de arquetipos (ej. un "Creador de Juego", un
+    "Finalizador" y un "Especialista en Recuperación").
+
+-   Análisis del Rival: Permite mapear el ADN del oponente de forma
+    visual. Si el rival abusa del Cluster 5 (Juego Físico), el
+    entrenador puede ajustar su sistema de salida de zona para evitar
+    colisiones y maximizar la posesión.
+
+#### Reflexión Final
+
+Con este trabajo queremos destacar que la transición de una gestión
+basada en la intuición a una gestión basada en el rol funcional no busca
+sustituir al analista humano, sino dotarlo de nuevas herramientas con
+mayor precisión. En una liga tan competitiva como la NHL, creemos que
+comprender el valor de un jugador desde su arquetipo estadístico y no
+desde letra asignada a su ficha técnica es la diferencia entre la
+mediocridad y la contención por el título.
+
+## LÍNEAS DE MEJORA
+
+Por último, somos conscientes de que este análisis podría ir más allá.
+En un futuro podrían estudiarse aún más facetas del juego en la NHL a
+partir de estos datos, haciendo el estudio más completo:
+
+#### A. Porteros
+
+Aunque tal y como como se indicaba al inicio, hemos dejado de lado los
+porteros por ser una posición muy diferente al resto, su papel también
+es determinante en el hockey. Un buen portero marca una gran diferencia
+entre la victoria y la derrota. Por ello, sería muy interesante realizar
+un estudio centrado únicamente en ellos y ver si dentro de esa posición,
+también existen diferentes estilos de juego.
+
+#### B. Análisis de la Eficiencia
+
+Se han empleado métricas que son promedios por partido. Esto beneficia a
+los jugadores con mucho tiempo en hielo (TOI). Sería interesante contar
+con ver métricas "Per 60" (goles por cada 60 minutos de juego). Esto
+permitiría descubrir "Joyas Ocultas" en el Cluster 6 (Rotación) que
+producen al nivel de superestrellas pero tienen menos minutos. Esto para
+directores deportivos con el suficiente criterio para diferenciar
+jugadores con potencial estrella de jugadores brillantes en un
+determinado contexto del partido sería otra métrica de gran ayuda.
